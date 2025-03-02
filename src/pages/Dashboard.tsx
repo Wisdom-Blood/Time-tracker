@@ -233,68 +233,12 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
-              Weekly Working Time
-            </h2>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => handleWeekChange(new Date(currentWeek.getTime() - 7 * 24 * 60 * 60 * 1000))}
-                className="p-2 rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                Previous Week
-              </button>
-              <button
-                onClick={() => handleWeekChange(new Date(currentWeek.getTime() + 7 * 24 * 60 * 60 * 1000))}
-                className="p-2 rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                Next Week
-              </button>
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="flex items-center justify-center h-64">
-              <p className="text-gray-500 dark:text-gray-400">Loading data...</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-900/50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      User
-                    </th>
-                    {Object.keys(workingTimeData[0]?.weeklyHours || {}).map(day => (
-                      <th key={day} className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        {day}
-                      </th>
-                    ))}
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Total
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {workingTimeData.map((userData, index) => (
-                    <tr key={userData.userId} className={index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900/50'}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                        {userData.userName}
-                      </td>
-                      {Object.values(userData.weeklyHours).map((hours, idx) => (
-                        <td key={idx} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                          {hours === null ? '-' : `${hours}h`}
-                        </td>
-                      ))}
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 dark:text-blue-400">
-                        {userData.totalHours}h
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <WeeklyWorkingTimeTable
+            data={workingTimeData}
+            loading={loading}
+            currentWeek={currentWeek}
+            onWeekChange={handleWeekChange}
+          />
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
