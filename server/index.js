@@ -10,6 +10,9 @@ import reportRoutes from './routes/reports.js';
 import targetTimesRoutes from './routes/targetTimes.js';
 import dashboardRoutes from './routes/dashboard.js';
 import transactionRoutes from './routes/transactions.js';
+import freelancerRoutes from './routes/freelancer.js';
+import upworkRoutes from './routes/upwork.js';
+import bidRoutes from './routes/bids.js';
 
 // Load environment variables
 dotenv.config();
@@ -36,6 +39,18 @@ export const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0
 });
+
+// Update freelancer_bids table
+const updateFreelancerBidsTable = `
+  ALTER TABLE freelancer_bids 
+  ADD COLUMN IF NOT EXISTS status ENUM('sent', 'chat', 'offer') NOT NULL DEFAULT 'sent'
+`;
+
+// Update upwork_bids table
+const updateUpworkBidsTable = `
+  ALTER TABLE upwork_bids 
+  MODIFY COLUMN status ENUM('sent', 'chat', 'offer') NOT NULL DEFAULT 'sent'
+`;
 
 // Initialize database
 const initDb = async () => {
@@ -152,6 +167,9 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/target-times', targetTimesRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/freelancer', freelancerRoutes);
+app.use('/api/upwork', upworkRoutes);
+app.use('/api/bids', bidRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {

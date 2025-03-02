@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { LogOut, User, LayoutDashboard, Users, Menu, X, Clock, CreditCard, Sun, Moon } from 'lucide-react';
+import { LogOut, User, LayoutDashboard, Users, Menu, X, Clock, CreditCard, Sun, Moon, History, ChevronDown } from 'lucide-react';
 
 const Navbar = () => {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
@@ -10,6 +10,7 @@ const Navbar = () => {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const { theme, toggleTheme } = useTheme();
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -98,6 +99,61 @@ const Navbar = () => {
                   <CreditCard className="w-5 h-5 mr-1" />
                   Transactions
                 </Link>
+              </div>
+            )}
+            {isAuthenticated && (
+              <div className="hidden items-center sm:ml-6 sm:flex sm:space-x-8">
+                {user && (
+                  <>
+                    <div className="relative inline-block text-left">
+                      <button
+                        onClick={() => setIsHistoryOpen(!isHistoryOpen)}
+                        className={`inline-flex items-center px-3 py-2 text-sm font-medium ${
+                          isHistoryOpen
+                            ? 'text-blue-600 dark:text-blue-400'
+                            : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
+                        }`}
+                      >
+                        <History className="mr-2 h-5 w-5" />
+                        History
+                        <ChevronDown className={`ml-1 h-4 w-4 transition-transform duration-200 ${isHistoryOpen ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      {isHistoryOpen && (
+                        <div className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-lg bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-700 focus:outline-none">
+                          <div className="py-1" role="menu" aria-orientation="vertical">
+                            <Link
+                              to="/freelancer-bid-history"
+                              className="flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700"
+                              onClick={() => setIsHistoryOpen(false)}
+                            >
+                              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 mr-3">
+                                <History className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                              </span>
+                              <div>
+                                <p className="font-medium">Freelancer History</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">View your Freelancer bid history</p>
+                              </div>
+                            </Link>
+                            <Link
+                              to="/upwork-bid-history"
+                              className="flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                              onClick={() => setIsHistoryOpen(false)}
+                            >
+                              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 mr-3">
+                                <History className="h-4 w-4 text-green-600 dark:text-green-400" />
+                              </span>
+                              <div>
+                                <p className="font-medium">Upwork History</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">View your Upwork bid history</p>
+                              </div>
+                            </Link>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>

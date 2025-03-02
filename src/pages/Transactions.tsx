@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import DatePicker from 'react-datepicker';
 import Select from 'react-select';
+import CustomDatePicker from '../components/DatePicker';
 import "react-datepicker/dist/react-datepicker.css";
 import {
   Plus,
@@ -669,29 +669,18 @@ export default function Transactions() {
                 <Calendar className="w-4 h-4 mr-2" />
                 Date Range
               </label>
-              <div className="flex space-x-2">
-                <DatePicker
-                  selected={filterData.startDate}
-                  onChange={handleStartDateChange}
-                  selectsStart
-                  startDate={filterData.startDate}
-                  endDate={filterData.endDate}
-                  className="pl-10 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 
-                           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  placeholderText="Start date"
+              <div className="grid grid-cols-2 gap-3">
+                <CustomDatePicker
+                  selectedDate={filterData.startDate}
+                  onChange={(date) => handleStartDateChange(date)}
+                  placeholder="Start date"
+                  isDark={theme === 'dark'}
                 />
-                <DatePicker
-                  selected={filterData.endDate}
-                  onChange={handleEndDateChange}
-                  selectsEnd
-                  startDate={filterData.startDate || undefined}
-                  endDate={filterData.endDate || undefined}
-                  minDate={filterData.startDate || undefined}
-                  className="pl-10 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 
-                           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  placeholderText="End date"
+                <CustomDatePicker
+                  selectedDate={filterData.endDate}
+                  onChange={(date) => handleEndDateChange(date)}
+                  placeholder="End date"
+                  isDark={theme === 'dark'}
                 />
               </div>
             </div>
@@ -1097,20 +1086,12 @@ export default function Transactions() {
                         Date
                       </label>
                       <div className="relative mt-1">
-                        <DatePicker
-                          selected={formData.date}
-                          onChange={(date: Date | null) => setFormData({ ...formData, date: date || new Date() })}
-                          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-                                   text-sm font-medium text-gray-900 dark:text-gray-100 
-                                   bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 
-                                   focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
-                          dateFormat="MMMM d, yyyy"
-                          showPopperArrow={false}
-                          calendarClassName="shadow-lg rounded-lg border border-gray-200 dark:border-gray-600 
-                                          bg-white dark:bg-gray-800"
-                          wrapperClassName="w-full"
+                        <CustomDatePicker
+                          selectedDate={formData.date}
+                          onChange={(date) => setFormData({ ...formData, date: date || new Date() })}
+                          placeholder="Select date"
+                          isDark={theme === 'dark'}
                         />
-                        <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none h-5 w-5" />
                       </div>
                     </div>
 
