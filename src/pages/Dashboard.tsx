@@ -38,7 +38,10 @@ interface DashboardStats {
   monthlyPlan: number;
   monthlyProgress: number;
   totalEarnings: number;
-  topUser: string;
+  topUser: {
+    name: string;
+    amount: number;
+  };
 }
 
 const Dashboard = () => {
@@ -54,7 +57,10 @@ const Dashboard = () => {
     monthlyPlan: 0,
     monthlyProgress: 0,
     totalEarnings: 0,
-    topUser: 'N/A'
+    topUser: {
+      name: 'N/A',
+      amount: 0
+    }
   });
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
@@ -99,6 +105,7 @@ const Dashboard = () => {
         `http://localhost:5000/api/transactions/dashboard-stats/${currentYear}/${currentMonth + 1}`,
         { withCredentials: true }
       );
+      console.log(res.data);
       setDashboardStats(res.data);
     } catch (err) {
       console.error('Failed to fetch dashboard stats:', err);
@@ -180,8 +187,8 @@ const Dashboard = () => {
     {
       icon: Award,
       title: 'Top Performer',
-      value: dashboardStats.topUser,
-      subtitle: `$${(monthlyData?.userEarnings?.find(u => u.userName === dashboardStats.topUser)?.amount || 0).toLocaleString()}`
+      value: dashboardStats.topUser.name,
+      subtitle: `$${dashboardStats.topUser.amount.toLocaleString()}`
     }
   ];
 
