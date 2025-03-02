@@ -13,7 +13,7 @@ router.get('/stats/weekly', auth, async (req, res) => {
     const weekEnd = endOfWeek(date, { weekStartsOn: 1 });
 
     // Get all users first
-    const [users] = await pool.query('SELECT id, name FROM users');
+    const [users] = await pool.query('SELECT id, name FROM users WHERE role = "user"');
 
     // Query for freelancer bids
     const freelancerQuery = `
@@ -25,7 +25,7 @@ router.get('/stats/weekly', auth, async (req, res) => {
         COUNT(CASE WHEN b.status = 'offer' THEN 1 END) as offer
       FROM users u
       LEFT JOIN freelancer_bids b ON u.id = b.user_id AND b.created_at BETWEEN ? AND ?
-      WHERE u.id = ?
+      WHERE u.id = ? AND u.role = 'user'
       GROUP BY u.name, DATE(b.created_at)
     `;
 
@@ -39,7 +39,7 @@ router.get('/stats/weekly', auth, async (req, res) => {
         COUNT(CASE WHEN b.status = 'offer' THEN 1 END) as offer
       FROM users u
       LEFT JOIN upwork_bids b ON u.id = b.user_id AND b.created_at BETWEEN ? AND ?
-      WHERE u.id = ?
+      WHERE u.id = ? AND u.role = 'user'
       GROUP BY u.name, DATE(b.created_at)
     `;
 

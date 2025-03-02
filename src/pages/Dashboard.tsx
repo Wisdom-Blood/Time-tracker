@@ -127,7 +127,6 @@ const Dashboard = () => {
         `http://localhost:5000/api/transactions/dashboard-stats/${currentYear}/${currentMonth + 1}`,
         { withCredentials: true }
       );
-      console.log(res.data);
       setDashboardStats(res.data);
     } catch (err) {
       console.error('Failed to fetch dashboard stats:', err);
