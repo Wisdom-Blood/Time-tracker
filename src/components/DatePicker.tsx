@@ -7,6 +7,9 @@ interface CustomDatePickerProps {
   onChange: (date: Date | null) => void;
   placeholder?: string;
   isDark?: boolean;
+  portalId?: string;
+  calendarClassName?: string;
+  wrapperClassName?: string;
 }
 
 const CustomInput = forwardRef<HTMLInputElement, { 
@@ -58,7 +61,10 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   selectedDate,
   onChange,
   placeholder = 'Select date',
-  isDark = false
+  isDark = false,
+  portalId,
+  calendarClassName,
+  wrapperClassName
 }) => {
   const inputClassName = `
     block w-full rounded-md border
@@ -115,58 +121,25 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
       <DatePicker
         selected={selectedDate}
         onChange={onChange}
-        dateFormat="yyyy-MM-dd"
         placeholderText={placeholder}
-        showMonthDropdown
-        showYearDropdown
-        dropdownMode="select"
-        customInput={
-          <CustomInput 
-            className={inputClassName} 
-            placeholder={placeholder}
-            onClear={() => onChange(null)}
-            hasValue={!!selectedDate}
-            isDark={isDark}
-          />
-        }
-        className={inputClassName}
-        wrapperClassName="w-full"
-        calendarClassName={`
-          shadow-lg border rounded-lg
-          ${isDark 
-            ? 'bg-gray-800 border-gray-600 text-gray-100' 
-            : 'bg-white border-gray-200 text-gray-700'
-          }
-        `}
-        dayClassName={date => {
-          const isToday = date.toDateString() === new Date().toDateString();
-          return `
-            hover:bg-blue-50 rounded-full flex items-center justify-center
-            ${isDark 
-              ? 'text-gray-100 hover:bg-gray-700/50' 
-              : 'text-gray-700 hover:bg-blue-50/80'
-            }
-            ${isToday 
-              ? isDark 
-                ? 'bg-gray-700/50 font-semibold' 
-                : 'bg-gray-100/80 font-semibold'
-              : ''
-            }
-          `;
+        className={`px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
+                  text-sm font-medium text-gray-900 dark:text-gray-100 
+                  bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 
+                  focus:outline-none focus:ring-2 focus:ring-blue-500 w-full`}
+        dateFormat="MM/dd/yyyy"
+        portalId={portalId}
+        calendarClassName={`${calendarClassName} shadow-lg border border-gray-200 dark:border-gray-700`}
+        wrapperClassName={wrapperClassName}
+        popperPlacement="bottom"
+        onClickOutside={e => e.stopPropagation()}
+        popperProps={{
+          strategy: "absolute"
         }}
-        monthClassName={() => 
-          `${isDark ? 'text-gray-100' : 'text-gray-700'}`
-        }
-        weekDayClassName={() => 
-          `${isDark ? 'text-gray-400' : 'text-gray-600'}`
-        }
-        portalId="root"
-        popperClassName="z-[9999]"
-        popperPlacement="bottom-start"
       />
       <style>{`
         .react-datepicker-popper {
           z-index: 9999 !important;
+          margin-top: 8px !important;
         }
         
         .react-datepicker-wrapper {
@@ -175,11 +148,10 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         
         .react-datepicker {
           font-family: inherit;
-          border: none;
+          background-color: ${isDark ? '#1f2937' : '#ffffff'};
           border-radius: 0.5rem;
-          overflow: hidden;
-          z-index: 9999;
-          box-shadow: var(--dp-shadow);
+          border: 1px solid ${isDark ? '#374151' : '#e5e7eb'};
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         
         .react-datepicker__month-container {

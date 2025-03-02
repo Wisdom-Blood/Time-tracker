@@ -893,7 +893,12 @@ export default function Transactions() {
         <Dialog
           as="div"
           className="relative z-10"
-          onClose={() => setIsOpen(false)}
+          onClose={(open) => {
+            // Only close if clicking outside the modal
+            if (!document.querySelector('.react-datepicker-popper:hover')) {
+              setIsOpen(open);
+            }
+          }}
         >
           <Transition.Child
             as={Fragment}
@@ -1091,6 +1096,9 @@ export default function Transactions() {
                           onChange={(date) => setFormData({ ...formData, date: date || new Date() })}
                           placeholder="Select date"
                           isDark={theme === 'dark'}
+                          portalId="date-picker-portal"
+                          calendarClassName="z-[9999]"
+                          wrapperClassName="z-[9999]"
                         />
                       </div>
                     </div>
@@ -1208,6 +1216,8 @@ export default function Transactions() {
           </div>
         </Dialog>
       </Transition>
+
+      <div id="date-picker-portal" className="relative z-[9999]" />
     </div>
   );
 } 
