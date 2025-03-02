@@ -10,6 +10,9 @@ import reportRoutes from './routes/reports.js';
 import targetTimesRoutes from './routes/targetTimes.js';
 import dashboardRoutes from './routes/dashboard.js';
 import transactionRoutes from './routes/transactions.js';
+import freelancerRoutes from './routes/freelancer.js';
+import upworkRoutes from './routes/upwork.js';
+import bidRoutes from './routes/bids.js';
 
 // Load environment variables
 dotenv.config();
@@ -36,6 +39,18 @@ export const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0
 });
+
+// Update freelancer_bids table
+const updateFreelancerBidsTable = `
+  ALTER TABLE freelancer_bids 
+  ADD COLUMN IF NOT EXISTS status ENUM('sent', 'chat', 'offer') NOT NULL DEFAULT 'sent'
+`;
+
+// Update upwork_bids table
+const updateUpworkBidsTable = `
+  ALTER TABLE upwork_bids 
+  MODIFY COLUMN status ENUM('sent', 'chat', 'offer') NOT NULL DEFAULT 'sent'
+`;
 
 // Initialize database
 const initDb = async () => {
@@ -113,6 +128,63 @@ const initDb = async () => {
     `;
     
     await pool.query(createTransactionsTable);
+
+    // Create bids table
+    const createFreelancerBidsTable = `
+      CREATE TABLE IF NOT EXISTS freelancer_bids (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        skill VARCHAR(255) NOT NULL,
+        bid_number INT NOT NULL,
+        status ENUM('sent', 'chat', 'offer') NOT NULL DEFAULT 'sent',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `;
+    
+    await pool.query(createFreelancerBidsTable);
+    
+    // Create chats table
+    const createFreelancerChatsTable = `
+      CREATE TABLE IF NOT EXISTS freelancer_chats (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        client_name VARCHAR(255) NOT NULL,
+        client_country VARCHAR(255) NOT NULL,
+        project_title VARCHAR(255) NOT NULL,
+        review DECIMAL(3,1) NOT NULL DEFAULT 0,
+        review_number INT NOT NULL DEFAULT 0,
+        spent_money DECIMAL(10,2) NOT NULL DEFAULT 0,
+        is_awarded BOOLEAN NOT NULL DEFAULT false,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `;
+    
+    await pool.query(createFreelancerChatsTable);
+    
+    // Create upwork bids table
+    const createUpworkBidsTable = `
+      CREATE TABLE IF NOT EXISTS upwork_bids (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        bid_date DATE NOT NULL,
+        client_name VARCHAR(255) NOT NULL,
+        country VARCHAR(2) NOT NULL,
+        total_spent DECIMAL(10, 2) NOT NULL DEFAULT 0,
+        average_hourly_rate DECIMAL(10, 2) NOT NULL DEFAULT 0,
+        spent_bid_amount DECIMAL(10, 2) NOT NULL DEFAULT 0,
+        account_name VARCHAR(255) NOT NULL,
+        status ENUM('sent', 'chat', 'offer') NOT NULL DEFAULT 'sent',
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `;
+    
+    await pool.query(createUpworkBidsTable);
     
     // Insert default target times if not exists
     const [existingTargets] = await pool.query('SELECT * FROM target_working_times');
@@ -152,6 +224,9 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/target-times', targetTimesRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/freelancer', freelancerRoutes);
+app.use('/api/upwork', upworkRoutes);
+app.use('/api/bids', bidRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {

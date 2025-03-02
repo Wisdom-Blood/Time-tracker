@@ -10,6 +10,8 @@ import WorkReports from './pages/WorkReports';
 import TargetTimeManagement from './pages/TargetTimeManagement';
 import Transactions from './pages/Transactions';
 import { ThemeProvider } from './context/ThemeContext';
+import FreelancerBidHistory from './pages/FreelancerBidHistory';
+import UpworkBidHistory from './pages/UpworkBidHistory';
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -102,6 +104,22 @@ function App() {
                       <Transactions />
                     </ProtectedRoute>
                   } 
+                />
+                <Route
+                  path="/freelancer-bid-history"
+                  element={
+                    <ProtectedRoute>
+                      <FreelancerBidHistory />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/upwork-bid-history"
+                  element={
+                    <ProtectedRoute>
+                      <UpworkBidHistory />
+                    </ProtectedRoute>
+                  }
                 />
                 <Route path="/" element={<Navigate to="/login" />} />
               </Routes>
