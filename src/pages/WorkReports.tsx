@@ -5,6 +5,7 @@ import { Clock, Calendar, Trash2, PencilIcon, Search, ChevronLeft, ChevronRight,
 import { timeFormat } from '../utils/timeFormat';
 import { Transition } from '@headlessui/react';
 import { useTheme } from '../context/ThemeContext';
+import CustomDatePicker from '../components/DatePicker';
 
 interface WorkReport {
   id: number;
@@ -299,19 +300,15 @@ const WorkReports = () => {
                 <Calendar className="w-4 h-4 mr-2" />
                 Start Date
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Calendar className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="date"
-                  value={dateRange.startDate}
-                  onChange={(e) => setDateRange(prev => ({ ...prev, startDate: e.target.value }))}
-                  className="pl-10 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 
-                           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                />
-              </div>
+              <CustomDatePicker
+                selectedDate={dateRange.startDate ? new Date(dateRange.startDate) : null}
+                onChange={(date) => setDateRange(prev => ({ 
+                  ...prev, 
+                  startDate: date ? date.toISOString().split('T')[0] : '' 
+                }))}
+                placeholder="Select start date"
+                isDark={theme === 'dark'}
+              />
             </div>
 
             <div className="flex-1 min-w-[240px]">
@@ -319,19 +316,15 @@ const WorkReports = () => {
                 <Calendar className="w-4 h-4 mr-2" />
                 End Date
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Calendar className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="date"
-                  value={dateRange.endDate}
-                  onChange={(e) => setDateRange(prev => ({ ...prev, endDate: e.target.value }))}
-                  className="pl-10 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 
-                           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                />
-              </div>
+              <CustomDatePicker
+                selectedDate={dateRange.endDate ? new Date(dateRange.endDate) : null}
+                onChange={(date) => setDateRange(prev => ({ 
+                  ...prev, 
+                  endDate: date ? date.toISOString().split('T')[0] : '' 
+                }))}
+                placeholder="Select end date"
+                isDark={theme === 'dark'}
+              />
             </div>
           </div>
         </div>
@@ -372,22 +365,15 @@ const WorkReports = () => {
                   <label htmlFor="report_date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Date *
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Calendar className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      id="report_date"
-                      type="date"
-                      value={formData.report_date}
-                      onChange={(e) => setFormData({ ...formData, report_date: e.target.value })}
-                      className="pl-10 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-                               focus:outline-none focus:ring-2 focus:ring-blue-500 
-                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      required
-                      disabled={!!editingReport}
-                    />
-                  </div>
+                  <CustomDatePicker
+                    selectedDate={formData.report_date ? new Date(formData.report_date) : null}
+                    onChange={(date) => setFormData({ 
+                      ...formData, 
+                      report_date: date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0] 
+                    })}
+                    placeholder="Select date"
+                    isDark={theme === 'dark'}
+                  />
                 </div>
                 
                 <div>
