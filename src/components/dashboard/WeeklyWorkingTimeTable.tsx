@@ -1,5 +1,6 @@
-import { ChevronLeft, ChevronRight, User } from 'lucide-react';
+import { ChevronLeft, ChevronRight, User, RotateCw } from 'lucide-react';
 import { timeFormat } from '../../utils/timeFormat';
+import { useState } from 'react';
 
 interface WorkingTimeData {
   userId: number;
@@ -14,9 +15,12 @@ interface WeeklyWorkingTimeTableProps {
   loading?: boolean;
   currentWeek: Date;
   onWeekChange: (date: Date) => void;
+  onReload?: () => Promise<void>;
 }
 
-const WeeklyWorkingTimeTable = ({ data, loading, currentWeek, onWeekChange }: WeeklyWorkingTimeTableProps) => {
+const WeeklyWorkingTimeTable = ({ data, loading, currentWeek, onWeekChange, onReload }: WeeklyWorkingTimeTableProps) => {
+  const [isReloading, setIsReloading] = useState(false);
+
   const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   
   // Get the week period dates
@@ -50,6 +54,18 @@ const WeeklyWorkingTimeTable = ({ data, loading, currentWeek, onWeekChange }: We
     date.setDate(weekPeriod.start.getDate() + index);
     return date;
   });
+
+  // Add reload handler
+  const handleReload = async () => {
+    if (onReload) {
+      setIsReloading(true);
+      try {
+        await onReload();
+      } finally {
+        setIsReloading(false);
+      }
+    }
+  };
 
   if (loading) {
     return (
@@ -102,6 +118,15 @@ const WeeklyWorkingTimeTable = ({ data, loading, currentWeek, onWeekChange }: We
             >
               <ChevronRight className="h-5 w-5" />
             </button>
+            <button
+              onClick={handleReload}
+              disabled={isReloading}
+              className={`p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 
+                ${isReloading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              title="Reload data"
+            >
+              <RotateCw className={`h-5 w-5 ${isReloading ? 'animate-spin' : ''}`} />
+            </button>
           </div>
         </div>
       </div>
@@ -142,7 +167,7 @@ const WeeklyWorkingTimeTable = ({ data, loading, currentWeek, onWeekChange }: We
                       <div className={`text-sm ${
                         validHours === null 
                           ? 'text-gray-400 dark:text-gray-500' 
-                          : day === 'Sun(2)' 
+                          : day === 'Sun' 
                             ? validHours >= timeFormat.toDecimal('08:00') ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'
                             : validHours >= timeFormat.toDecimal('16:00') ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'
                       }`}>

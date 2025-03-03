@@ -263,6 +263,14 @@ const Dashboard = () => {
   // Fix the linter errors in the table section
   const hasEarningsData = monthlyData?.userEarnings && monthlyData.userEarnings.length > 0;
 
+  const handleReloadWeeklyData = async () => {
+    try {
+      await fetchDashboardData(currentWeek);
+    } catch (error) {
+      console.error('Error reloading weekly data:', error);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 dark:bg-gray-900">
       {error && (
@@ -306,6 +314,7 @@ const Dashboard = () => {
             loading={loading}
             currentWeek={currentWeek}
             onWeekChange={handleWeekChange}
+            onReload={handleReloadWeeklyData}
           />
         </div>
 
