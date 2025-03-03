@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { Users, DollarSign, Target, Award } from 'lucide-react';
+import { Users, DollarSign, Target, Award, Wallet } from 'lucide-react';
 import StatsCard from '../components/dashboard/StatsCard';
 import WeeklyWorkingTimeTable from '../components/dashboard/WeeklyWorkingTimeTable';
 import EarningChart from '../components/dashboard/EarningChart';
@@ -42,6 +42,7 @@ interface DashboardStats {
     name: string;
     amount: number;
   };
+  allTimeEarnings: number;
 }
 
 const Dashboard = () => {
@@ -60,7 +61,8 @@ const Dashboard = () => {
     topUser: {
       name: 'N/A',
       amount: 0
-    }
+    },
+    allTimeEarnings: 0
   });
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
@@ -189,6 +191,12 @@ const Dashboard = () => {
       title: 'Top Performer',
       value: dashboardStats.topUser.name,
       subtitle: `$${dashboardStats.topUser.amount.toLocaleString()}`
+    },
+    {
+      icon: Wallet,
+      title: 'Total Earnings',
+      value: `$${dashboardStats.allTimeEarnings.toLocaleString()}`,
+      subtitle: 'All time earnings'
     }
   ];
 

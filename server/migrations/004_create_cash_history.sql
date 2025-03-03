@@ -1,0 +1,9 @@
+-- Create cash_history table
+CREATE TABLE IF NOT EXISTS cash_history (
+  id SERIAL PRIMARY KEY,
+  amount DECIMAL(10,2) NOT NULL,
+  reason TEXT NOT NULL,
+  date DATE NOT NULL,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+); 

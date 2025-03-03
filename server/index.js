@@ -10,6 +10,7 @@ import reportRoutes from './routes/reports.js';
 import targetTimesRoutes from './routes/targetTimes.js';
 import dashboardRoutes from './routes/dashboard.js';
 import transactionRoutes from './routes/transactions.js';
+import cashHistoryRoutes from './routes/cash-history.js';
 
 // Load environment variables
 dotenv.config();
@@ -47,10 +48,10 @@ const initDb = async () => {
       password: process.env.DB_PASSWORD,
       port: process.env.DB_PORT
     });
-    
+
     await connection.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME}`);
     await connection.end();
-    
+
     // Create users table with role column and target_money
     const createTableQuery = `
       CREATE TABLE IF NOT EXISTS users (
@@ -63,9 +64,20 @@ const initDb = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
-    
-    await pool.query(createTableQuery);
-    
+
+    const createCashHistoryTableQuery = `
+      CREATE TABLE IF NOT EXISTS cash_history (
+      id SERIAL PRIMARY KEY,
+      amount DECIMAL(10,2) NOT NULL,
+      reason TEXT NOT NULL,
+      date DATE NOT NULL,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ); 
+    `;
+
+    await pool.query(createCashHistoryTableQuery);
+
     // Create work reports table
     const createReportsTable = `
       CREATE TABLE IF NOT EXISTS work_reports (
@@ -79,9 +91,9 @@ const initDb = async () => {
         UNIQUE KEY unique_user_date (user_id, report_date)
       )
     `;
-    
+
     await pool.query(createReportsTable);
-    
+
     // Create target working times table
     const createTargetTimesTable = `
       CREATE TABLE IF NOT EXISTS target_working_times (
@@ -93,9 +105,9 @@ const initDb = async () => {
         FOREIGN KEY (updated_by) REFERENCES users(id)
       )
     `;
-    
+
     await pool.query(createTargetTimesTable);
-    
+
     // Create transactions table
     const createTransactionsTable = `
       CREATE TABLE IF NOT EXISTS transactions (
@@ -111,9 +123,9 @@ const initDb = async () => {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )
     `;
-    
+
     await pool.query(createTransactionsTable);
-    
+
     // Insert default target times if not exists
     const [existingTargets] = await pool.query('SELECT * FROM target_working_times');
     if (existingTargets.length === 0) {
@@ -122,22 +134,22 @@ const initDb = async () => {
         [16.00, 8.00]
       );
     }
-    
+
     // Check if admin exists, if not create default admin
     const [admins] = await pool.query("SELECT * FROM users WHERE role = 'admin'");
-    
+
     if (admins.length === 0) {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash('admin123', salt);
-      
+
       await pool.query(
         'INSERT INTO users (name, email, password, role, target_money) VALUES (?, ?, ?, ?, ?)',
         ['Admin', 'admin@example.com', hashedPassword, 'admin', 3000.00]
       );
-      
+
       console.log('Default admin created with email: admin@example.com and password: admin123');
     }
-    
+
     console.log('Database initialized successfully');
   } catch (error) {
     console.error('Database initialization error:', error);
@@ -152,6 +164,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/target-times', targetTimesRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/cash-history', cashHistoryRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {
