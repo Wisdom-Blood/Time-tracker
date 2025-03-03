@@ -9,6 +9,7 @@ import Navbar from './components/Navbar';
 import WorkReports from './pages/WorkReports';
 import TargetTimeManagement from './pages/TargetTimeManagement';
 import Transactions from './pages/Transactions';
+import CashHistory from './pages/CashHistory';
 import { ThemeProvider } from './context/ThemeContext';
 import FreelancerBidHistory from './pages/FreelancerBidHistory';
 import UpworkBidHistory from './pages/UpworkBidHistory';
@@ -102,6 +103,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Transactions />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/cash-history" 
+                  element={
+                    <ProtectedRoute>
+                      <CashHistory />
                     </ProtectedRoute>
                   } 
                 />

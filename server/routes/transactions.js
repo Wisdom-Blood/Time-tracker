@@ -247,12 +247,19 @@ router.get('/dashboard-stats/:year/:month', async (req, res) => {
             amount: parseFloat(transactionRows[0].total_amount)
         } : { name: 'N/A', amount: 0 };
 
+        // Get all-time total earnings
+        const [allTimeRows] = await pool.query(
+            'SELECT SUM(amount) as total FROM transactions'
+        );
+        const allTimeEarnings = parseFloat(allTimeRows[0].total) || 0;
+
         res.json({
             totalUsers,
             monthlyPlan,
             monthlyProgress,
             totalEarnings,
-            topUser
+            topUser,
+            allTimeEarnings
         });
     } catch (error) {
         console.error('Error fetching dashboard stats:', error);

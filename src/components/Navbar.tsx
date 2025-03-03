@@ -9,6 +9,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
@@ -20,19 +21,23 @@ const Navbar = () => {
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
     ...(isAdmin ? [
-      { name: 'User Management', path: '/users', icon: <Users className="h-5 w-5" /> },
+      { name: 'Users', path: '/users', icon: <Users className="h-5 w-5" /> },
       { name: 'Target Times', path: '/target-times', icon: <Clock className="h-5 w-5" /> }
-    ] : []),
-    { name: 'Work Reports', path: '/reports', icon: <Clock className="h-5 w-5" /> },
+    ] : [
+      { name: 'Work Reports', path: '/reports', icon: <Clock className="h-5 w-5" /> }
+    ])
+  ];
+
+  const paymentLinks = [
     { name: 'Transactions', path: '/transactions', icon: <CreditCard className="h-5 w-5" /> },
-    { name: 'Profile', path: '/profile', icon: <User className="h-5 w-5" /> },
+    { name: 'Cash History', path: '/cash-history', icon: <CreditCard className="h-5 w-5" /> }
   ];
 
   return (
     <nav className="bg-white dark:bg-gray-800 shadow-lg">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between h-16">
-          <div className="flex">
+          <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
               <Link to="/dashboard" className="text-xl font-bold text-gray-800 dark:text-white">
                 TimeTracker
@@ -41,67 +46,61 @@ const Navbar = () => {
 
             {isAuthenticated && (
               <div className="hidden sm:ml-6 sm:flex sm:space-x-4">
-                <Link
-                  to="/dashboard"
-                  className={`inline-flex items-center px-3 py-2 text-sm font-medium ${location.pathname === '/dashboard'
-                      ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className={`inline-flex items-center px-3 py-2 text-sm font-medium ${
+                      location.pathname === link.path
+                        ? 'text-blue-600 dark:text-blue-400'
+                        : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
                     }`}
-                >
-                  <LayoutDashboard className="w-5 h-5 mr-1" />
-                  Dashboard
-                </Link>
+                  >
+                    {link.icon}
+                    <span className="ml-1">{link.name}</span>
+                  </Link>
+                ))}
 
-                <Link
-                  to="/reports"
-                  className={`inline-flex items-center px-3 py-2 text-sm font-medium ${location.pathname === '/reports'
-                      ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
+                {/* Payment Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsPaymentOpen(!isPaymentOpen)}
+                    className={`inline-flex items-center px-3 py-2 text-sm font-medium ${
+                      paymentLinks.some(link => location.pathname === link.path)
+                        ? 'text-blue-600 dark:text-blue-400'
+                        : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
                     }`}
-                >
-                  <Clock className="w-5 h-5 mr-1" />
-                  Reports
-                </Link>
+                  >
+                    <CreditCard className="h-5 w-5 mr-1" />
+                    Payment
+                    <ChevronDown className={`ml-1 h-4 w-4 transform transition-transform ${isPaymentOpen ? 'rotate-180' : ''}`} />
+                  </button>
 
-                {isAdmin && (
-                  <>
-                    <Link
-                      to="/users"
-                      className={`inline-flex items-center px-3 py-2 text-sm font-medium ${location.pathname === '/users'
-                          ? 'text-blue-600 dark:text-blue-400'
-                          : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
-                        }`}
-                    >
-                      <Users className="w-5 h-5 mr-1" />
-                      Users
-                    </Link>
-
-                    <Link
-                      to="/target-times"
-                      className={`inline-flex items-center px-3 py-2 text-sm font-medium ${location.pathname === '/target-times'
-                          ? 'text-blue-600 dark:text-blue-400'
-                          : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
-                        }`}
-                    >
-                      <Clock className="w-5 h-5 mr-1" />
-                      Target Times
-                    </Link>
-
-                  </>
-                )}
-                <Link
-                  to="/transactions"
-                  className={`inline-flex items-center px-3 py-2 text-sm font-medium ${location.pathname === '/transactions'
-                      ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
-                    }`}
-                >
-                  <CreditCard className="w-5 h-5 mr-1" />
-                  Transactions
-                </Link>
+                  {isPaymentOpen && (
+                    <div className="absolute z-10 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5">
+                      <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="payment-menu">
+                        {paymentLinks.map((link) => (
+                          <Link
+                            key={link.path}
+                            to={link.path}
+                            className={`flex items-center px-4 py-2 text-sm ${
+                              location.pathname === link.path
+                                ? 'bg-gray-100 dark:bg-gray-600 text-blue-600 dark:text-blue-400'
+                                : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600'
+                            }`}
+                            onClick={() => setIsPaymentOpen(false)}
+                          >
+                            {link.icon}
+                            <span className="ml-2">{link.name}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
-            {isAuthenticated && (
+            {isAuthenticated && !isAdmin && (
               <div className="hidden items-center sm:ml-6 sm:flex sm:space-x-8">
                 {user && (
                   <>
@@ -158,7 +157,7 @@ const Navbar = () => {
             )}
           </div>
 
-          <div className="hidden sm:ml-6 sm:flex sm:items-center">
+          <div className="flex items-center">
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
                 <div className="text-sm text-gray-700 dark:text-gray-300">
@@ -187,10 +186,11 @@ const Navbar = () => {
               <div className="flex items-center space-x-4">
                 <Link
                   to="/login"
-                  className={`px-3 py-1.5 text-sm font-medium rounded-md ${location.pathname === '/login'
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md ${
+                    location.pathname === '/login'
                       ? 'bg-blue-50 text-blue-700 dark:text-gray-300 dark:hover:text-white'
                       : 'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
-                    }`}
+                  }`}
                 >
                   Login
                 </Link>
@@ -218,14 +218,15 @@ const Navbar = () => {
       {isMenuOpen && (
         <div className="sm:hidden">
           <div className="pt-2 pb-3 space-y-1">
-            {isAuthenticated && navLinks.map((link) => (
+            {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
-                className={`flex items-center px-3 py-2 text-base font-medium ${location.pathname === link.path
+                className={`flex items-center px-3 py-2 text-base font-medium ${
+                  location.pathname === link.path
                     ? 'bg-blue-50 border-blue-500 text-blue-700'
                     : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
-                  }`}
+                }`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 <span className="mr-2">{link.icon}</span>
@@ -233,31 +234,65 @@ const Navbar = () => {
               </Link>
             ))}
 
-            {isAuthenticated && (
-              <>
-                <button
-                  onClick={toggleTheme}
-                  className="flex items-center w-full px-3 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+            {/* Mobile Payment Links */}
+            {paymentLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`flex items-center px-3 py-2 text-base font-medium ${
+                  location.pathname === link.path
+                    ? 'bg-blue-50 border-blue-500 text-blue-700'
+                    : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <span className="mr-2">{link.icon}</span>
+                {link.name}
+              </Link>
+            ))}
+
+            {!isAdmin && (
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-2">
+                <Link
+                  to="/freelancer-bid-history"
+                  className="flex items-center px-3 py-2 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-800"
+                  onClick={() => setIsMenuOpen(false)}
                 >
-                  {theme === 'light' ? (
-                    <Moon className="h-5 w-5 mr-2" />
-                  ) : (
-                    <Sun className="h-5 w-5 mr-2" />
-                  )}
-                  {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
-                </button>
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setIsMenuOpen(false);
-                  }}
-                  className="flex items-center w-full px-3 py-2 text-base font-medium text-red-600 hover:bg-red-50"
+                  <History className="h-5 w-5 mr-2" />
+                  Freelancer History
+                </Link>
+                <Link
+                  to="/upwork-bid-history"
+                  className="flex items-center px-3 py-2 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-800"
+                  onClick={() => setIsMenuOpen(false)}
                 >
-                  <LogOut className="h-5 w-5 mr-2" />
-                  Logout
-                </button>
-              </>
+                  <History className="h-5 w-5 mr-2" />
+                  Upwork History
+                </Link>
+              </div>
             )}
+
+            <button
+              onClick={toggleTheme}
+              className="flex items-center w-full px-3 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
+              {theme === 'light' ? (
+                <Moon className="h-5 w-5 mr-2" />
+              ) : (
+                <Sun className="h-5 w-5 mr-2" />
+              )}
+              {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+            </button>
+            <button
+              onClick={() => {
+                handleLogout();
+                setIsMenuOpen(false);
+              }}
+              className="flex items-center w-full px-3 py-2 text-base font-medium text-red-600 hover:bg-red-50"
+            >
+              <LogOut className="h-5 w-5 mr-2" />
+              Logout
+            </button>
           </div>
         </div>
       )}
