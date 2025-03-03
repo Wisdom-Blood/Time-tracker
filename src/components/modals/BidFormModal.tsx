@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BidData, NewBidData } from '../../services/freelancerBidService';
+import CustomDatePicker from '../DatePicker';
+import { useTheme } from '../../context/ThemeContext';
 
 interface BidFormModalProps {
   isOpen: boolean;
@@ -11,12 +13,15 @@ interface BidFormModalProps {
 interface ValidationErrors {
   skill?: string;
   bidNumber?: string;
+  bidDate?: string;
 }
 
 const BidFormModal = ({ isOpen, onClose, onSubmit, initialData }: BidFormModalProps) => {
+  const { theme } = useTheme();
   const [formData, setFormData] = useState<NewBidData>({
     skill: '',
-    bidNumber: 0
+    bidNumber: 0,
+    bidDate: new Date().toISOString().split('T')[0]
   });
 
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -26,12 +31,14 @@ const BidFormModal = ({ isOpen, onClose, onSubmit, initialData }: BidFormModalPr
     if (initialData) {
       setFormData({
         skill: initialData.skill,
-        bidNumber: initialData.bidNumber
+        bidNumber: initialData.bidNumber,
+        bidDate: initialData.bidDate
       });
     } else {
       setFormData({
         skill: '',
-        bidNumber: 0
+        bidNumber: 0,
+        bidDate: new Date().toISOString().split('T')[0]
       });
     }
     setErrors({});
@@ -48,6 +55,10 @@ const BidFormModal = ({ isOpen, onClose, onSubmit, initialData }: BidFormModalPr
 
     if (formData.bidNumber <= 0) {
       newErrors.bidNumber = 'Bid number must be greater than 0';
+    }
+
+    if (!formData.bidDate) {
+      newErrors.bidDate = 'Date is required';
     }
 
     setErrors(newErrors);
@@ -100,6 +111,27 @@ const BidFormModal = ({ isOpen, onClose, onSubmit, initialData }: BidFormModalPr
               </h3>
               <div className="space-y-4">
                 <div>
+                  <label htmlFor="bidDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Date
+                  </label>
+                  <CustomDatePicker
+                    selectedDate={formData.bidDate ? new Date(formData.bidDate) : null}
+                    onChange={(date) => {
+                      setFormData({
+                        ...formData,
+                        bidDate: date ? date.toISOString().split('T')[0] : ''
+                      });
+                      if (errors.bidDate) setErrors({ ...errors, bidDate: undefined });
+                    }}
+                    isDark={theme === 'dark'}
+                    portalId="bid-date-portal"
+                  />
+                  {errors.bidDate && (
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.bidDate}</p>
+                  )}
+                </div>
+
+                <div>
                   <label htmlFor="skill" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Skill
                   </label>
@@ -111,10 +143,10 @@ const BidFormModal = ({ isOpen, onClose, onSubmit, initialData }: BidFormModalPr
                       setFormData({ ...formData, skill: e.target.value });
                       if (errors.skill) setErrors({ ...errors, skill: undefined });
                     }}
-                    className={`mt-1 block w-full rounded-md px-3 py-2 shadow-sm ${
+                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm ${
                       errors.skill 
                         ? 'border-red-300 dark:border-red-500 focus:border-red-500 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-red-900 dark:text-red-300' 
-                        : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                     } placeholder-gray-400 dark:placeholder-gray-500`}
                     required
                   />
@@ -135,10 +167,10 @@ const BidFormModal = ({ isOpen, onClose, onSubmit, initialData }: BidFormModalPr
                       setFormData({ ...formData, bidNumber: parseInt(e.target.value) || 0 });
                       if (errors.bidNumber) setErrors({ ...errors, bidNumber: undefined });
                     }}
-                    className={`mt-1 block w-full rounded-md px-3 py-2 shadow-sm ${
+                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm ${
                       errors.bidNumber 
                         ? 'border-red-300 dark:border-red-500 focus:border-red-500 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-red-900 dark:text-red-300' 
-                        : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                     } placeholder-gray-400 dark:placeholder-gray-500`}
                     min="1"
                     required
@@ -178,4 +210,4 @@ const BidFormModal = ({ isOpen, onClose, onSubmit, initialData }: BidFormModalPr
   );
 };
 
-export default BidFormModal; 
+export default BidFormModal;

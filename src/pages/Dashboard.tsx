@@ -23,6 +23,25 @@ interface WorkingTimeData {
   totalHours: number;
 }
 
+interface BidStats {
+  freelancer: {
+    [userName: string]: {
+      [date: string]: DayStats;
+    };
+  };
+  upwork: {
+    [userName: string]: {
+      [date: string]: DayStats;
+    };
+  };
+}
+
+interface DayStats {
+  sent: number;
+  chat: number;
+  offer: number;
+}
+
 interface MonthlyData {
   totalEarnings: number;
   totalTarget: number;

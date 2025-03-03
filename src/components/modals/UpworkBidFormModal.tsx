@@ -42,7 +42,7 @@ const UpworkBidFormModal = ({ isOpen, onClose, onSubmit, initialData }: UpworkBi
     averageHourlyRate: initialData.averageHourlyRate,
     spentBidAmount: initialData.spentBidAmount,
     accountName: initialData.accountName,
-    status: initialData.status
+    status: initialData.status || 'chat'
   } : initialFormData);
 
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -79,7 +79,7 @@ const UpworkBidFormModal = ({ isOpen, onClose, onSubmit, initialData }: UpworkBi
         averageHourlyRate: initialData.averageHourlyRate,
         spentBidAmount: initialData.spentBidAmount,
         accountName: initialData.accountName,
-        status: initialData.status
+        status: initialData.status || 'chat'
       });
     } else {
       setFormData(initialFormData);
@@ -92,10 +92,6 @@ const UpworkBidFormModal = ({ isOpen, onClose, onSubmit, initialData }: UpworkBi
 
     if (!formData.bidDate) {
       newErrors.bidDate = 'Date is required';
-    }
-
-    if (!formData.clientName.trim()) {
-      newErrors.clientName = 'Client name is required';
     }
 
     if (!formData.country) {
@@ -128,7 +124,11 @@ const UpworkBidFormModal = ({ isOpen, onClose, onSubmit, initialData }: UpworkBi
 
     try {
       setIsSubmitting(true);
-      await onSubmit(formData);
+      const submissionData = {
+        ...formData,
+        status: formData.status || 'chat'
+      };
+      await onSubmit(submissionData);
       onClose();
     } catch (error) {
       console.error('Error submitting bid:', error);
@@ -204,12 +204,11 @@ const UpworkBidFormModal = ({ isOpen, onClose, onSubmit, initialData }: UpworkBi
                       setFormData({ ...formData, clientName: e.target.value });
                       if (errors.clientName) setErrors({ ...errors, clientName: undefined });
                     }}
-                    className={`mt-1 block w-full rounded-md px-3 py-2 shadow-sm ${
+                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm ${
                       errors.clientName 
                         ? 'border-red-300 dark:border-red-500 focus:border-red-500 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-red-900 dark:text-red-300' 
-                        : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                     } placeholder-gray-400 dark:placeholder-gray-500`}
-                    required
                   />
                   {errors.clientName && (
                     <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.clientName}</p>
@@ -296,10 +295,10 @@ const UpworkBidFormModal = ({ isOpen, onClose, onSubmit, initialData }: UpworkBi
                       setFormData({ ...formData, totalSpent: parseFloat(e.target.value) || 0 });
                       if (errors.totalSpent) setErrors({ ...errors, totalSpent: undefined });
                     }}
-                    className={`mt-1 block w-full rounded-md px-3 py-2 shadow-sm ${
+                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm ${
                       errors.totalSpent 
                         ? 'border-red-300 dark:border-red-500 focus:border-red-500 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-red-900 dark:text-red-300' 
-                        : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                     } placeholder-gray-400 dark:placeholder-gray-500`}
                     min="0"
                     step="0.01"
@@ -322,10 +321,10 @@ const UpworkBidFormModal = ({ isOpen, onClose, onSubmit, initialData }: UpworkBi
                       setFormData({ ...formData, averageHourlyRate: parseFloat(e.target.value) || 0 });
                       if (errors.averageHourlyRate) setErrors({ ...errors, averageHourlyRate: undefined });
                     }}
-                    className={`mt-1 block w-full rounded-md px-3 py-2 shadow-sm ${
+                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm ${
                       errors.averageHourlyRate 
                         ? 'border-red-300 dark:border-red-500 focus:border-red-500 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-red-900 dark:text-red-300' 
-                        : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                     } placeholder-gray-400 dark:placeholder-gray-500`}
                     min="0"
                     step="0.01"
@@ -338,7 +337,7 @@ const UpworkBidFormModal = ({ isOpen, onClose, onSubmit, initialData }: UpworkBi
 
                 <div>
                   <label htmlFor="spentBidAmount" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Spent Bid Amount ($)
+                    Connects
                   </label>
                   <input
                     type="number"
@@ -348,10 +347,10 @@ const UpworkBidFormModal = ({ isOpen, onClose, onSubmit, initialData }: UpworkBi
                       setFormData({ ...formData, spentBidAmount: parseFloat(e.target.value) || 0 });
                       if (errors.spentBidAmount) setErrors({ ...errors, spentBidAmount: undefined });
                     }}
-                    className={`mt-1 block w-full rounded-md px-3 py-2 shadow-sm ${
+                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm ${
                       errors.spentBidAmount 
                         ? 'border-red-300 dark:border-red-500 focus:border-red-500 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-red-900 dark:text-red-300' 
-                        : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                     } placeholder-gray-400 dark:placeholder-gray-500`}
                     min="0"
                     step="0.01"
@@ -374,10 +373,10 @@ const UpworkBidFormModal = ({ isOpen, onClose, onSubmit, initialData }: UpworkBi
                       setFormData({ ...formData, accountName: e.target.value });
                       if (errors.accountName) setErrors({ ...errors, accountName: undefined });
                     }}
-                    className={`mt-1 block w-full rounded-md px-3 py-2 shadow-sm ${
+                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm ${
                       errors.accountName 
                         ? 'border-red-300 dark:border-red-500 focus:border-red-500 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-red-900 dark:text-red-300' 
-                        : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                     } placeholder-gray-400 dark:placeholder-gray-500`}
                     required
                   />
@@ -406,6 +405,7 @@ const UpworkBidFormModal = ({ isOpen, onClose, onSubmit, initialData }: UpworkBi
                   >
                     <option value="chat" className="dark:bg-gray-700">Chat</option>
                     <option value="client_view" className="dark:bg-gray-700">Client View</option>
+                    <option value="no_view" className="dark:bg-gray-700">No View</option>
                     <option value="offer" className="dark:bg-gray-700">Offer</option>
                     <option value="reject" className="dark:bg-gray-700">Reject</option>
                   </select>

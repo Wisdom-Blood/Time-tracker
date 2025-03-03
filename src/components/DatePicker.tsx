@@ -137,8 +137,13 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         }}
       />
       <style>{`
+        #${portalId} {
+          position: relative;
+          z-index: 9999;
+        }
+        
         .react-datepicker-popper {
-          z-index: 9999 !important;
+          z-index: 99999 !important;
           margin-top: 8px !important;
         }
         

@@ -80,6 +80,8 @@ const initDb = async () => {
       )
     `;
 
+    await pool.query(createTableQuery);
+
     const createCashHistoryTableQuery = `
       CREATE TABLE IF NOT EXISTS cash_history (
       id SERIAL PRIMARY KEY,
@@ -148,6 +150,7 @@ const initDb = async () => {
         user_id INT NOT NULL,
         skill VARCHAR(255) NOT NULL,
         bid_number INT NOT NULL,
+        bid_date DATE NOT NULL DEFAULT CURRENT_DATE,
         status ENUM('sent', 'chat', 'offer') NOT NULL DEFAULT 'sent',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -169,6 +172,7 @@ const initDb = async () => {
         review_number INT NOT NULL DEFAULT 0,
         spent_money DECIMAL(10,2) NOT NULL DEFAULT 0,
         is_awarded BOOLEAN NOT NULL DEFAULT false,
+        chat_date DATE NOT NULL DEFAULT CURRENT_DATE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -189,7 +193,7 @@ const initDb = async () => {
         average_hourly_rate DECIMAL(10, 2) NOT NULL DEFAULT 0,
         spent_bid_amount DECIMAL(10, 2) NOT NULL DEFAULT 0,
         account_name VARCHAR(255) NOT NULL,
-        status ENUM('sent', 'chat', 'offer') NOT NULL DEFAULT 'sent',
+        status ENUM('chat', 'offer', 'client_view', 'no_view', 'reject') NOT NULL DEFAULT 'no_view',
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

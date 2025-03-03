@@ -8,7 +8,7 @@ export interface UpworkBidData {
   averageHourlyRate: number;
   spentBidAmount: number;
   accountName: string;
-  status: 'chat' | 'client_view' | 'offer' | 'reject';
+  status: 'chat' | 'client_view' | 'no_view' | 'offer' | 'reject';
   createdAt: string;
   updatedAt: string;
 }
@@ -21,7 +21,7 @@ export interface NewUpworkBidData {
   averageHourlyRate: number;
   spentBidAmount: number;
   accountName: string;
-  status: 'chat' | 'client_view' | 'offer' | 'reject';
+  status: 'chat' | 'client_view' | 'no_view' | 'offer' | 'reject';
 }
 
 export interface Country {

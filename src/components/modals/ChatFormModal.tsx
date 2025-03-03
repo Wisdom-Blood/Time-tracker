@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ChatData, NewChatData, FreelancerBidService, Country } from '../../services/freelancerBidService';
 import { useAuth } from '../../hooks/useAuth';
+import CustomDatePicker from '../DatePicker';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ChatFormModalProps {
   isOpen: boolean;
@@ -16,11 +18,13 @@ interface ValidationErrors {
   review?: string;
   reviewNumber?: string;
   spentMoney?: string;
+  chatDate?: string;
   submit?: string;
 }
 
 const ChatFormModal = ({ isOpen, onClose, onSubmit, initialData }: ChatFormModalProps) => {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const initialFormData: NewChatData = {
     clientName: '',
     projectTitle: '',
@@ -29,6 +33,7 @@ const ChatFormModal = ({ isOpen, onClose, onSubmit, initialData }: ChatFormModal
     spentMoney: 0,
     isAwarded: false,
     clientCountry: '',
+    chatDate: new Date().toISOString().split('T')[0]
   };
 
   const [formData, setFormData] = useState<NewChatData>(initialData ? {
@@ -39,6 +44,7 @@ const ChatFormModal = ({ isOpen, onClose, onSubmit, initialData }: ChatFormModal
     spentMoney: initialData.spentMoney,
     isAwarded: initialData.isAwarded,
     clientCountry: initialData.clientCountry || '',
+    chatDate: initialData.chatDate
   } : initialFormData);
 
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -76,6 +82,7 @@ const ChatFormModal = ({ isOpen, onClose, onSubmit, initialData }: ChatFormModal
         spentMoney: initialData.spentMoney,
         isAwarded: initialData.isAwarded,
         clientCountry: initialData.clientCountry || '',
+        chatDate: initialData.chatDate
       });
     } else {
       setFormData(initialFormData);
@@ -108,6 +115,10 @@ const ChatFormModal = ({ isOpen, onClose, onSubmit, initialData }: ChatFormModal
 
     if (!formData.clientCountry) {
       newErrors.clientCountry = 'Country is required';
+    }
+
+    if (!formData.chatDate) {
+      newErrors.chatDate = 'Date is required';
     }
 
     setErrors(newErrors);
@@ -191,6 +202,27 @@ const ChatFormModal = ({ isOpen, onClose, onSubmit, initialData }: ChatFormModal
                 {initialData ? 'Edit Chat' : 'Create New Chat'}
               </h3>
               <div className="space-y-4">
+                <div>
+                  <label htmlFor="chatDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Date
+                  </label>
+                  <CustomDatePicker
+                    selectedDate={formData.chatDate ? new Date(formData.chatDate) : null}
+                    onChange={(date) => {
+                      setFormData({
+                        ...formData,
+                        chatDate: date ? date.toISOString().split('T')[0] : ''
+                      });
+                      if (errors.chatDate) setErrors({ ...errors, chatDate: undefined });
+                    }}
+                    isDark={theme === 'dark'}
+                    portalId="chat-date-portal"
+                  />
+                  {errors.chatDate && (
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.chatDate}</p>
+                  )}
+                </div>
+
                 <div>
                   <label htmlFor="country" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Country
@@ -278,10 +310,10 @@ const ChatFormModal = ({ isOpen, onClose, onSubmit, initialData }: ChatFormModal
                       setFormData({ ...formData, projectTitle: e.target.value });
                       if (errors.projectTitle) setErrors({ ...errors, projectTitle: undefined });
                     }}
-                    className={`mt-1 block w-full rounded-md px-3 py-2 shadow-sm ${
+                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm ${
                       errors.projectTitle 
                         ? 'border-red-300 dark:border-red-500 focus:border-red-500 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-red-900 dark:text-red-300' 
-                        : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                     } placeholder-gray-400 dark:placeholder-gray-500`}
                     required
                   />
@@ -302,10 +334,10 @@ const ChatFormModal = ({ isOpen, onClose, onSubmit, initialData }: ChatFormModal
                       setFormData({ ...formData, clientName: e.target.value });
                       if (errors.clientName) setErrors({ ...errors, clientName: undefined });
                     }}
-                    className={`mt-1 block w-full rounded-md px-3 py-2 shadow-sm ${
+                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm ${
                       errors.clientName 
                         ? 'border-red-300 dark:border-red-500 focus:border-red-500 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-red-900 dark:text-red-300' 
-                        : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                     } placeholder-gray-400 dark:placeholder-gray-500`}
                     required
                   />
@@ -326,10 +358,10 @@ const ChatFormModal = ({ isOpen, onClose, onSubmit, initialData }: ChatFormModal
                       setFormData({ ...formData, review: parseFloat(e.target.value) || 0 });
                       if (errors.review) setErrors({ ...errors, review: undefined });
                     }}
-                    className={`mt-1 block w-full rounded-md px-3 py-2 shadow-sm ${
+                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm ${
                       errors.review 
                         ? 'border-red-300 dark:border-red-500 focus:border-red-500 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-red-900 dark:text-red-300' 
-                        : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                     } placeholder-gray-400 dark:placeholder-gray-500`}
                     min="0"
                     max="5"
@@ -353,10 +385,10 @@ const ChatFormModal = ({ isOpen, onClose, onSubmit, initialData }: ChatFormModal
                       setFormData({ ...formData, reviewNumber: parseInt(e.target.value) || 0 });
                       if (errors.reviewNumber) setErrors({ ...errors, reviewNumber: undefined });
                     }}
-                    className={`mt-1 block w-full rounded-md px-3 py-2 shadow-sm ${
+                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm ${
                       errors.reviewNumber 
                         ? 'border-red-300 dark:border-red-500 focus:border-red-500 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-red-900 dark:text-red-300' 
-                        : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                     } placeholder-gray-400 dark:placeholder-gray-500`}
                     min="0"
                     required
@@ -378,10 +410,10 @@ const ChatFormModal = ({ isOpen, onClose, onSubmit, initialData }: ChatFormModal
                       setFormData({ ...formData, spentMoney: parseFloat(e.target.value) || 0 });
                       if (errors.spentMoney) setErrors({ ...errors, spentMoney: undefined });
                     }}
-                    className={`mt-1 block w-full rounded-md px-3 py-2 shadow-sm ${
+                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm ${
                       errors.spentMoney 
                         ? 'border-red-300 dark:border-red-500 focus:border-red-500 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-red-900 dark:text-red-300' 
-                        : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                     } placeholder-gray-400 dark:placeholder-gray-500`}
                     min="0"
                     step="0.01"
