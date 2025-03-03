@@ -11,6 +11,8 @@ import TargetTimeManagement from './pages/TargetTimeManagement';
 import Transactions from './pages/Transactions';
 import CashHistory from './pages/CashHistory';
 import { ThemeProvider } from './context/ThemeContext';
+import FreelancerBidHistory from './pages/FreelancerBidHistory';
+import UpworkBidHistory from './pages/UpworkBidHistory';
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -104,6 +106,7 @@ function App() {
                     </ProtectedRoute>
                   } 
                 />
+<<<<<<< HEAD
                 <Route 
                   path="/cash-history" 
                   element={
@@ -111,6 +114,23 @@ function App() {
                       <CashHistory />
                     </ProtectedRoute>
                   } 
+=======
+                <Route
+                  path="/freelancer-bid-history"
+                  element={
+                    <ProtectedRoute>
+                      <FreelancerBidHistory />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/upwork-bid-history"
+                  element={
+                    <ProtectedRoute>
+                      <UpworkBidHistory />
+                    </ProtectedRoute>
+                  }
+>>>>>>> ec447256e12ce79deb2f5be214aec512365a6d6f
                 />
                 <Route path="/" element={<Navigate to="/login" />} />
               </Routes>

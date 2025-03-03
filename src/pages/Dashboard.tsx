@@ -11,6 +11,8 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Listbox, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { BarChart, Bar, Cell } from 'recharts';
+import { WeeklyBidStats } from '../components/dashboard/WeeklyBidStats';
+import { startOfWeek, endOfWeek, eachDayOfInterval, addDays } from 'date-fns';
 
 interface WorkingTimeData {
   userId: number;
@@ -53,6 +55,7 @@ const Dashboard = () => {
   const [earningData, setEarningData] = useState([]);
   const [error, setError] = useState('');
   const [currentWeek, setCurrentWeek] = useState(new Date());
+  const [bidStats, setBidStats] = useState<BidStats | null>(null);
   const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
     totalUsers: 0,
     monthlyPlan: 0,
@@ -77,21 +80,40 @@ const Dashboard = () => {
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
+  const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 }); // Start from Monday
+  const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 });
+  const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
+
+  const fetchBidStats = async (date: Date) => {
+    try {
+      const formattedDate = date.toISOString();
+      const response = await axios.get(
+        `http://localhost:5000/api/bids/stats/weekly?date=${formattedDate}`,
+        { withCredentials: true }
+      );
+      setBidStats(response.data);
+    } catch (err) {
+      console.error('Failed to fetch bid stats:', err);
+      setError('Failed to load bid statistics');
+    }
+  };
+
   const fetchDashboardData = async (date: Date) => {
     try {
       setLoading(true);
       setError('');
 
       // Format date for the API
-      const formattedDate = date.toISOString();
-      
-      console.log('Fetching data for date:', formattedDate);
+      const formattedDate = date.toISOString();    
       
       const workingTimeRes = await axios.get(
         `http://localhost:5000/api/reports/weekly?date=${formattedDate}`,
         { withCredentials: true }
       );
       setWorkingTimeData(workingTimeRes.data);
+
+      // Fetch bid stats
+      await fetchBidStats(date);
 
     } catch (err: any) {
       console.error('Failed to fetch dashboard data:', err);
@@ -107,7 +129,6 @@ const Dashboard = () => {
         `http://localhost:5000/api/transactions/dashboard-stats/${currentYear}/${currentMonth + 1}`,
         { withCredentials: true }
       );
-      console.log(res.data);
       setDashboardStats(res.data);
     } catch (err) {
       console.error('Failed to fetch dashboard stats:', err);
@@ -165,6 +186,15 @@ const Dashboard = () => {
       '#EC4899', '#6366F1', '#14B8A6', '#F97316', '#06B6D4'
     ];
     return colors[index % colors.length];
+  };
+
+  const getStatsForDate = (date: Date, platform: 'freelancer' | 'upwork', userName: string): DayStats => {
+    if (!bidStats || !bidStats[platform][userName]) {
+      return { sent: 0, chat: 0, offer: 0 };
+    }
+
+    const formattedDate = date.toISOString().split('T')[0];
+    return bidStats[platform][userName][formattedDate] || { sent: 0, chat: 0, offer: 0 };
   };
 
   const stats = [
@@ -464,7 +494,22 @@ const Dashboard = () => {
             </div>
           )}
         </div>
+
       </div>
+      
+      <div className="grid grid-cols-1 gap-8">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mt-6">
+            <WeeklyBidStats
+              stats={bidStats}
+              weekStart={weekStart}
+              weekEnd={weekEnd}
+              weekDays={weekDays}
+              handlePreviousWeek={() => handleWeekChange(addDays(currentWeek, -7))}
+              handleNextWeek={() => handleWeekChange(addDays(currentWeek, 7))}
+              getStatsForDate={getStatsForDate}
+            />
+          </div>
+        </div>
     </div>
   );
 };
