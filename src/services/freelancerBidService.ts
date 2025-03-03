@@ -3,6 +3,7 @@ export interface BidData {
   userId: string | number;
   skill: string;
   bidNumber: number;
+  bidDate: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -10,6 +11,7 @@ export interface BidData {
 export interface NewBidData {
   skill: string;
   bidNumber: number;
+  bidDate: string;
   updatedAt?: string;
 }
 
@@ -23,6 +25,7 @@ export interface ChatData {
   reviewNumber: number;
   spentMoney: number;
   isAwarded: boolean;
+  chatDate: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -35,6 +38,7 @@ export interface NewChatData {
   reviewNumber: number;
   spentMoney: number;
   isAwarded: boolean;
+  chatDate: string;
 }
 
 export interface Country {

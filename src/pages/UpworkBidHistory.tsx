@@ -66,6 +66,8 @@ const UpworkBidHistory = () => {
     status: ''
   });
   const [isFilterVisible, setIsFilterVisible] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   const fetchData = async () => {
     try {
@@ -228,6 +230,104 @@ const UpworkBidHistory = () => {
     });
   };
 
+  // Add pagination calculation functions
+  const indexOfLastBid = currentPage * itemsPerPage;
+  const indexOfFirstBid = indexOfLastBid - itemsPerPage;
+  const currentBids = filteredBids.slice(indexOfFirstBid, indexOfLastBid);
+  const totalPages = Math.ceil(filteredBids.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Add pagination controls component
+  const PaginationControls = ({ currentPage, totalPages, onPageChange }: { currentPage: number; totalPages: number; onPageChange: (page: number) => void }) => {
+    return (
+      <div className="mt-4 flex items-center justify-between px-4 py-3 sm:px-6">
+        <div className="flex flex-1 justify-between sm:hidden">
+          <button
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`relative inline-flex items-center rounded-md px-4 py-2 text-sm font-medium ${
+              currentPage === 1
+                ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+            } ring-1 ring-inset ring-gray-300 dark:ring-gray-700`}
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`relative ml-3 inline-flex items-center rounded-md px-4 py-2 text-sm font-medium ${
+              currentPage === totalPages
+                ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+            } ring-1 ring-inset ring-gray-300 dark:ring-gray-700`}
+          >
+            Next
+          </button>
+        </div>
+        <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              Showing <span className="font-medium">{indexOfFirstBid + 1}</span> to{' '}
+              <span className="font-medium">
+                {Math.min(indexOfLastBid, filteredBids.length)}
+              </span>{' '}
+              of <span className="font-medium">{filteredBids.length}</span> results
+            </p>
+          </div>
+          <div>
+            <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+              <button
+                onClick={() => onPageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 dark:text-gray-500 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 ${
+                  currentPage === 1
+                    ? 'bg-gray-100 dark:bg-gray-800'
+                    : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                <span className="sr-only">Previous</span>
+                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
+                </svg>
+              </button>
+              {[...Array(totalPages)].map((_, index) => (
+                <button
+                  key={index + 1}
+                  onClick={() => onPageChange(index + 1)}
+                  className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
+                    currentPage === index + 1
+                      ? 'z-10 bg-blue-600 dark:bg-blue-500 text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-blue-500'
+                      : 'text-gray-900 dark:text-gray-100 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-20 focus:outline-offset-0'
+                  }`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+              <button
+                onClick={() => onPageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 dark:text-gray-500 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 ${
+                  currentPage === totalPages
+                    ? 'bg-gray-100 dark:bg-gray-800'
+                    : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                <span className="sr-only">Next</span>
+                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
@@ -264,31 +364,7 @@ const UpworkBidHistory = () => {
         }`}
       >
         <div className="rounded-lg bg-white dark:bg-gray-800 p-4 shadow dark:shadow-gray-900">
-          <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                <Calendar className="w-4 h-4 mr-2 inline" />
-                Date Range
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <CustomDatePicker
-                    selectedDate={filters.dateFrom ? new Date(filters.dateFrom) : null}
-                    onChange={(date) => setFilters({ ...filters, dateFrom: date ? date.toISOString().split('T')[0] : '' })}
-                    placeholder="Start date"
-                    isDark={theme === 'dark'}
-                  />
-                </div>
-                <div>
-                  <CustomDatePicker
-                    selectedDate={filters.dateTo ? new Date(filters.dateTo) : null}
-                    onChange={(date) => setFilters({ ...filters, dateTo: date ? date.toISOString().split('T')[0] : '' })}
-                    placeholder="End date"
-                    isDark={theme === 'dark'}
-                  />
-                </div>
-              </div>
-            </div>
+          <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Client Name</label>
               <input
@@ -344,6 +420,24 @@ const UpworkBidHistory = () => {
               />
             </div>
             <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Min Bid Amount</label>
+              <input
+                type="number"
+                value={filters.minBidAmount}
+                onChange={(e) => setFilters({ ...filters, minBidAmount: e.target.value })}
+                className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-50 dark:focus:ring-opacity-50 hover:border-gray-400 dark:hover:border-gray-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Max Bid Amount</label>
+              <input
+                type="number"
+                value={filters.maxBidAmount}
+                onChange={(e) => setFilters({ ...filters, maxBidAmount: e.target.value })}
+                className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-50 dark:focus:ring-opacity-50 hover:border-gray-400 dark:hover:border-gray-500"
+              />
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Account Name</label>
               <input
                 type="text"
@@ -359,12 +453,37 @@ const UpworkBidHistory = () => {
                 onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                 className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-50 dark:focus:ring-opacity-50 hover:border-gray-400 dark:hover:border-gray-500"
               >
-                <option value="" className="dark:bg-gray-700">All</option>
-                <option value="chat" className="dark:bg-gray-700">Chat</option>
-                <option value="client_view" className="dark:bg-gray-700">Client View</option>
-                <option value="offer" className="dark:bg-gray-700">Offer</option>
-                <option value="reject" className="dark:bg-gray-700">Reject</option>
+                <option value="">All</option>
+                <option value="chat">Chat</option>
+                <option value="offer">Offer</option>
+                <option value="client_view">Client View</option>
+                <option value="no_view">No View</option>
+                <option value="reject">Reject</option>
               </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date From</label>
+              <div className="mt-1">
+                <CustomDatePicker
+                  selectedDate={filters.dateFrom ? new Date(filters.dateFrom) : null}
+                  onChange={(date) => setFilters({ ...filters, dateFrom: date ? date.toISOString().split('T')[0] : '' })}
+                  placeholder="Start date"
+                  isDark={theme === 'dark'}
+                  portalId="upwork-date-from-portal"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date To</label>
+              <div className="mt-1">
+                <CustomDatePicker
+                  selectedDate={filters.dateTo ? new Date(filters.dateTo) : null}
+                  onChange={(date) => setFilters({ ...filters, dateTo: date ? date.toISOString().split('T')[0] : '' })}
+                  placeholder="End date"
+                  isDark={theme === 'dark'}
+                  portalId="upwork-date-to-portal"
+                />
+              </div>
             </div>
           </div>
           <div className="flex justify-end">
@@ -421,7 +540,7 @@ const UpworkBidHistory = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
-              {filteredBids.map((bid) => (
+              {currentBids.map((bid) => (
                 <tr key={bid.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-300">{formatDate(bid.bidDate)}</td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-300">{bid.clientName}</td>
@@ -470,9 +589,9 @@ const UpworkBidHistory = () => {
                   </td>
                 </tr>
               ))}
-              {filteredBids.length === 0 && (
+              {currentBids.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                  <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
                     No bids found
                   </td>
                 </tr>
@@ -511,6 +630,13 @@ const UpworkBidHistory = () => {
         onConfirm={() => bidToDelete && handleDelete(bidToDelete)}
         title="Delete Bid"
         message="Are you sure you want to delete this bid? This action cannot be undone."
+      />
+
+      {/* Pagination Controls */}
+      <PaginationControls
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
       />
     </div>
   );

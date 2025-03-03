@@ -40,6 +40,9 @@ const FreelancerBidHistory = () => {
   const [chatData, setChatData] = useState<ChatData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentBidPage, setCurrentBidPage] = useState(1);
+  const [currentChatPage, setCurrentChatPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   const [filters, setFilters] = useState<FilterState>({
     skill: '',
     minBidNumber: '',
@@ -412,6 +415,113 @@ const FreelancerBidHistory = () => {
     );
   });
 
+  // Add pagination calculation functions
+  const indexOfLastBid = currentBidPage * itemsPerPage;
+  const indexOfFirstBid = indexOfLastBid - itemsPerPage;
+  const currentBids = filteredBidData.slice(indexOfFirstBid, indexOfLastBid);
+  const totalBidPages = Math.ceil(filteredBidData.length / itemsPerPage);
+
+  const indexOfLastChat = currentChatPage * itemsPerPage;
+  const indexOfFirstChat = indexOfLastChat - itemsPerPage;
+  const currentChats = filteredChatData.slice(indexOfFirstChat, indexOfLastChat);
+  const totalChatPages = Math.ceil(filteredChatData.length / itemsPerPage);
+
+  const handleBidPageChange = (pageNumber: number) => {
+    setCurrentBidPage(pageNumber);
+  };
+
+  const handleChatPageChange = (pageNumber: number) => {
+    setCurrentChatPage(pageNumber);
+  };
+
+  // Add pagination controls component
+  const PaginationControls = ({ currentPage, totalPages, onPageChange }: { currentPage: number; totalPages: number; onPageChange: (page: number) => void }) => {
+    return (
+      <div className="mt-4 flex items-center justify-between px-4 py-3 sm:px-6">
+        <div className="flex flex-1 justify-between sm:hidden">
+          <button
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`relative inline-flex items-center rounded-md px-4 py-2 text-sm font-medium ${
+              currentPage === 1
+                ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+            } ring-1 ring-inset ring-gray-300 dark:ring-gray-700`}
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`relative ml-3 inline-flex items-center rounded-md px-4 py-2 text-sm font-medium ${
+              currentPage === totalPages
+                ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+            } ring-1 ring-inset ring-gray-300 dark:ring-gray-700`}
+          >
+            Next
+          </button>
+        </div>
+        <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              Showing <span className="font-medium">{indexOfFirstBid + 1}</span> to{' '}
+              <span className="font-medium">
+                {Math.min(indexOfLastBid, filteredBidData.length)}
+              </span>{' '}
+              of <span className="font-medium">{filteredBidData.length}</span> results
+            </p>
+          </div>
+          <div>
+            <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+              <button
+                onClick={() => onPageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 dark:text-gray-500 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 ${
+                  currentPage === 1
+                    ? 'bg-gray-100 dark:bg-gray-800'
+                    : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                <span className="sr-only">Previous</span>
+                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+              {[...Array(totalPages)].map((_, index) => (
+                <button
+                  key={index + 1}
+                  onClick={() => onPageChange(index + 1)}
+                  className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
+                    currentPage === index + 1
+                      ? 'z-10 bg-blue-600 dark:bg-blue-500 text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-blue-500'
+                      : 'text-gray-900 dark:text-gray-100 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-20 focus:outline-offset-0'
+                  }`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+              <button
+                onClick={() => onPageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 dark:text-gray-500 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 ${
+                  currentPage === totalPages
+                    ? 'bg-gray-100 dark:bg-gray-800'
+                    : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                <span className="sr-only">Next</span>
+                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Add reset filters function
   const resetFilters = () => {
     setFilters({
@@ -531,235 +641,201 @@ const FreelancerBidHistory = () => {
             </button>
           </div>
           {activeTab === 'bid' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Skill</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Skill</label>
                 <input
                   type="text"
-                  placeholder="Filter by skill"
-                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 px-4 py-2.5 shadow-sm transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-20 hover:border-gray-400 dark:hover:border-gray-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   value={filters.skill}
-                  onChange={(e) => setFilters(prev => ({ ...prev, skill: e.target.value }))}
+                  onChange={(e) => setFilters({ ...filters, skill: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-50 dark:focus:ring-opacity-50 hover:border-gray-400 dark:hover:border-gray-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Bid Number Range</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <input
-                    type="number"
-                    placeholder="Min bid"
-                    className="block w-full rounded-md border-gray-300 dark:border-gray-600 px-4 py-2.5 shadow-sm transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-20 hover:border-gray-400 dark:hover:border-gray-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    value={filters.minBidNumber}
-                    onChange={(e) => setFilters(prev => ({ ...prev, minBidNumber: e.target.value }))}
-                  />
-                  <input
-                    type="number"
-                    placeholder="Max bid"
-                    className="block w-full rounded-md border-gray-300 dark:border-gray-600 px-4 py-2.5 shadow-sm transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-20 hover:border-gray-400 dark:hover:border-gray-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    value={filters.maxBidNumber}
-                    onChange={(e) => setFilters(prev => ({ ...prev, maxBidNumber: e.target.value }))}
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Min Bid Number</label>
+                <input
+                  type="number"
+                  value={filters.minBidNumber}
+                  onChange={(e) => setFilters({ ...filters, minBidNumber: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-50 dark:focus:ring-opacity-50 hover:border-gray-400 dark:hover:border-gray-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Max Bid Number</label>
+                <input
+                  type="number"
+                  value={filters.maxBidNumber}
+                  onChange={(e) => setFilters({ ...filters, maxBidNumber: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-50 dark:focus:ring-opacity-50 hover:border-gray-400 dark:hover:border-gray-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Project Title</label>
+                <input
+                  type="text"
+                  value={filters.projectTitle}
+                  onChange={(e) => setFilters({ ...filters, projectTitle: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-50 dark:focus:ring-opacity-50 hover:border-gray-400 dark:hover:border-gray-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Client Name</label>
+                <input
+                  type="text"
+                  value={filters.clientName}
+                  onChange={(e) => setFilters({ ...filters, clientName: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-50 dark:focus:ring-opacity-50 hover:border-gray-400 dark:hover:border-gray-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Client Country</label>
+                <input
+                  type="text"
+                  value={filters.clientCountry}
+                  onChange={(e) => setFilters({ ...filters, clientCountry: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-50 dark:focus:ring-opacity-50 hover:border-gray-400 dark:hover:border-gray-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Min Review</label>
+                <input
+                  type="number"
+                  value={filters.minReview}
+                  onChange={(e) => setFilters({ ...filters, minReview: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-50 dark:focus:ring-opacity-50 hover:border-gray-400 dark:hover:border-gray-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Min Review Number</label>
+                <input
+                  type="number"
+                  value={filters.minReviewNumber}
+                  onChange={(e) => setFilters({ ...filters, minReviewNumber: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-50 dark:focus:ring-opacity-50 hover:border-gray-400 dark:hover:border-gray-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Min Spent Money</label>
+                <input
+                  type="number"
+                  value={filters.minSpentMoney}
+                  onChange={(e) => setFilters({ ...filters, minSpentMoney: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-50 dark:focus:ring-opacity-50 hover:border-gray-400 dark:hover:border-gray-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Is Awarded</label>
+                <select
+                  value={filters.isAwarded}
+                  onChange={(e) => setFilters({ ...filters, isAwarded: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-50 dark:focus:ring-opacity-50 hover:border-gray-400 dark:hover:border-gray-500"
+                >
+                  <option value="">All</option>
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date From</label>
+                <div className="mt-1">
+                  <DatePicker
+                    selectedDate={dateFromObj}
+                    onChange={(date) => {
+                      setDateFromObj(date);
+                      setFilters(prev => ({
+                        ...prev,
+                        dateFrom: date ? date.toISOString().split('T')[0] : ''
+                      }));
+                    }}
+                    placeholder="Start date"
+                    isDark={theme === 'dark'}
+                    portalId="freelancer-date-from-portal"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  <Calendar className="w-4 h-4 mr-2 inline" />
-                  Date Range
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <DatePicker
-                      selectedDate={dateFromObj}
-                      onChange={(date) => {
-                        setDateFromObj(date);
-                        setFilters(prev => ({
-                          ...prev,
-                          dateFrom: date ? date.toISOString().split('T')[0] : ''
-                        }));
-                      }}
-                      placeholder="Start date"
-                      isDark={theme === 'dark'}
-                    />
-                  </div>
-                  <div>
-                    <DatePicker
-                      selectedDate={dateToObj}
-                      onChange={(date) => {
-                        setDateToObj(date);
-                        setFilters(prev => ({
-                          ...prev,
-                          dateTo: date ? date.toISOString().split('T')[0] : ''
-                        }));
-                      }}
-                      placeholder="End date"
-                      isDark={theme === 'dark'}
-                    />
-                  </div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date To</label>
+                <div className="mt-1">
+                  <DatePicker
+                    selectedDate={dateToObj}
+                    onChange={(date) => {
+                      setDateToObj(date);
+                      setFilters(prev => ({
+                        ...prev,
+                        dateTo: date ? date.toISOString().split('T')[0] : ''
+                      }));
+                    }}
+                    placeholder="End date"
+                    isDark={theme === 'dark'}
+                    portalId="freelancer-date-to-portal"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Chat Date From</label>
+                <div className="mt-1">
+                  <DatePicker
+                    selectedDate={chatDateFromObj}
+                    onChange={(date) => {
+                      setChatDateFromObj(date);
+                      setFilters(prev => ({
+                        ...prev,
+                        chatDateFrom: date ? date.toISOString().split('T')[0] : ''
+                      }));
+                    }}
+                    placeholder="Start date"
+                    isDark={theme === 'dark'}
+                    portalId="freelancer-chat-date-from-portal"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Chat Date To</label>
+                <div className="mt-1">
+                  <DatePicker
+                    selectedDate={chatDateToObj}
+                    onChange={(date) => {
+                      setChatDateToObj(date);
+                      setFilters(prev => ({
+                        ...prev,
+                        chatDateTo: date ? date.toISOString().split('T')[0] : ''
+                      }));
+                    }}
+                    placeholder="End date"
+                    isDark={theme === 'dark'}
+                    portalId="freelancer-chat-date-to-portal"
+                  />
                 </div>
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Project Title</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Project Title</label>
                 <input
                   type="text"
-                  placeholder="Filter by project"
-                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 px-4 py-2.5 shadow-sm transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-20 hover:border-gray-400 dark:hover:border-gray-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   value={filters.projectTitle}
-                  onChange={(e) => setFilters(prev => ({ ...prev, projectTitle: e.target.value }))}
+                  onChange={(e) => setFilters({ ...filters, projectTitle: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-50 dark:focus:ring-opacity-50 hover:border-gray-400 dark:hover:border-gray-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Client Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Client Name</label>
                 <input
                   type="text"
-                  placeholder="Filter by client"
-                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 px-4 py-2.5 shadow-sm transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-20 hover:border-gray-400 dark:hover:border-gray-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   value={filters.clientName}
-                  onChange={(e) => setFilters(prev => ({ ...prev, clientName: e.target.value }))}
+                  onChange={(e) => setFilters({ ...filters, clientName: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-50 dark:focus:ring-opacity-50 hover:border-gray-400 dark:hover:border-gray-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Review</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Client Country</label>
                 <input
-                  type="number"
-                  placeholder="Min review"
-                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 px-4 py-2.5 shadow-sm transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-20 hover:border-gray-400 dark:hover:border-gray-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  value={filters.minReview}
-                  onChange={(e) => setFilters(prev => ({ ...prev, minReview: e.target.value }))}
+                  type="text"
+                  value={filters.clientCountry}
+                  onChange={(e) => setFilters({ ...filters, clientCountry: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-50 dark:focus:ring-opacity-50 hover:border-gray-400 dark:hover:border-gray-500"
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Review Number</label>
-                <input
-                  type="number"
-                  placeholder="Min number"
-                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 px-4 py-2.5 shadow-sm transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-20 hover:border-gray-400 dark:hover:border-gray-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  value={filters.minReviewNumber}
-                  onChange={(e) => setFilters(prev => ({ ...prev, minReviewNumber: e.target.value }))}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Spent Money</label>
-                <input
-                  type="number"
-                  placeholder="Min spent"
-                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 px-4 py-2.5 shadow-sm transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-20 hover:border-gray-400 dark:hover:border-gray-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  value={filters.minSpentMoney}
-                  onChange={(e) => setFilters(prev => ({ ...prev, minSpentMoney: e.target.value }))}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Awarded Status</label>
-                <select
-                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 px-4 py-2.5 shadow-sm transition-all duration-200 text-gray-700 dark:text-gray-300 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-20 hover:border-gray-400 dark:hover:border-gray-500 sm:text-sm bg-white dark:bg-gray-700"
-                  value={filters.isAwarded}
-                  onChange={(e) => setFilters(prev => ({ ...prev, isAwarded: e.target.value }))}
-                >
-                  <option value="" className="dark:bg-gray-700">All</option>
-                  <option value="true" className="dark:bg-gray-700">Awarded</option>
-                  <option value="false" className="dark:bg-gray-700">Not Awarded</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Country</label>
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setIsCountryDropdownVisible(prev => !prev)}
-                    className="relative w-full cursor-pointer rounded-md bg-white dark:bg-gray-700 px-4 py-2.5 text-left border border-gray-300 dark:border-gray-600 shadow-sm transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-20 sm:text-sm"
-                  >
-                    <span className="flex items-center">
-                      {filters.clientCountry ? (
-                        <>
-                          {renderFlag(countries.find(c => c.code === filters.clientCountry)?.flag || '')}
-                          <span className="ml-2 truncate">
-                            {countries.find(c => c.code === filters.clientCountry)?.name || 'All Countries'}
-                          </span>
-                        </>
-                      ) : (
-                        <span className="text-gray-500 dark:text-gray-400">All Countries</span>
-                      )}
-                    </span>
-                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
-                      <svg className="h-4 w-4 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </span>
-                  </button>
-
-                  {isCountryDropdownVisible && (
-                    <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-gray-700 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                      <div
-                        className="relative cursor-pointer select-none px-4 py-2.5 transition-colors duration-200 hover:bg-blue-50 dark:hover:bg-blue-800"
-                        onClick={() => {
-                          setFilters(prev => ({ ...prev, clientCountry: '' }));
-                          setIsCountryDropdownVisible(false);
-                        }}
-                      >
-                        <span className="text-gray-500 dark:text-gray-400">All Countries</span>
-                      </div>
-                      {countries.map((country) => (
-                        <div
-                          key={country.code}
-                          className={`relative cursor-pointer select-none px-4 py-2.5 transition-colors duration-200 ${
-                            filters.clientCountry === country.code ? 'bg-blue-100 dark:bg-blue-800' : 'hover:bg-blue-50 dark:hover:bg-blue-800'
-                          }`}
-                          onClick={() => {
-                            setFilters(prev => ({ ...prev, clientCountry: country.code }));
-                            setIsCountryDropdownVisible(false);
-                          }}
-                        >
-                          <div className="flex items-center">
-                            {renderFlag(country.flag)}
-                            <span className="ml-2 truncate">{country.name}</span>
-                          </div>
-                          {filters.clientCountry === country.code && (
-                            <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600 dark:text-blue-400">
-                              <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                              </svg>
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Chat Date Range</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <DatePicker
-                      selectedDate={chatDateFromObj}
-                      onChange={(date) => {
-                        setChatDateFromObj(date);
-                        setFilters(prev => ({
-                          ...prev,
-                          chatDateFrom: date ? date.toISOString().split('T')[0] : ''
-                        }));
-                      }}
-                      placeholder="Start date"
-                      isDark={theme === 'dark'}
-                    />
-                  </div>
-                  <div>
-                    <DatePicker
-                      selectedDate={chatDateToObj}
-                      onChange={(date) => {
-                        setChatDateToObj(date);
-                        setFilters(prev => ({
-                          ...prev,
-                          chatDateTo: date ? date.toISOString().split('T')[0] : ''
-                        }));
-                      }}
-                      placeholder="End date"
-                      isDark={theme === 'dark'}
-                    />
-                  </div>
-                </div>
               </div>
             </div>
           )}
@@ -781,7 +857,7 @@ const FreelancerBidHistory = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
-                    {filteredBidData.map((bid) => (
+                    {currentBids.map((bid) => (
                       <tr key={bid.id} className={`${getRowClassName(bid.id)} hover:bg-gray-50 dark:hover:bg-gray-700/50`}>
                         <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-300">{bid.skill}</td>
                         <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-300">{bid.bidNumber}</td>
@@ -813,11 +889,23 @@ const FreelancerBidHistory = () => {
                         </td>
                       </tr>
                     ))}
+                    {currentBids.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                          No bids found
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
           </div>
+          <PaginationControls
+            currentPage={currentBidPage}
+            totalPages={totalBidPages}
+            onPageChange={handleBidPageChange}
+          />
         </div>
       ) : (
         <div className="mt-4 flow-root">
@@ -839,7 +927,7 @@ const FreelancerBidHistory = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
-                    {filteredChatData.map((chat) => (
+                    {currentChats.map((chat) => (
                       <tr key={chat.id} className={`${getRowClassName(chat.id)} hover:bg-gray-50 dark:hover:bg-gray-700/50`}>
                         <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-300">{chat.projectTitle}</td>
                         <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-300">{chat.clientName}</td>
@@ -897,11 +985,23 @@ const FreelancerBidHistory = () => {
                         </td>
                       </tr>
                     ))}
+                    {currentChats.length === 0 && (
+                      <tr>
+                        <td colSpan={9} className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                          No chats found
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
           </div>
+          <PaginationControls
+            currentPage={currentChatPage}
+            totalPages={totalChatPages}
+            onPageChange={handleChatPageChange}
+          />
         </div>
       )}
 
