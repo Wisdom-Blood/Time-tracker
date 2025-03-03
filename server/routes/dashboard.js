@@ -89,27 +89,28 @@ router.get('/weekly-bids', auth, async (req, res) => {
     const freelancerBidsQuery = `
       SELECT 
         u.name as user_name,
-        DATE(fb.created_at) as date,
-        COUNT(*) as sent_count
+        DATE(fb.bid_date) as date,
+        SUM(fb.bid_number) as bid_count,
+        COUNT(*) as row_count
       FROM users u
       LEFT JOIN freelancer_bids fb ON fb.user_id = u.id 
-        AND fb.created_at BETWEEN ? AND ?
+        AND fb.bid_date BETWEEN ? AND ?
       WHERE u.role = 'user'
-      GROUP BY u.name, DATE(fb.created_at)
+      GROUP BY u.name, DATE(fb.bid_date)
     `;
 
     // Get all users' freelancer chats stats
     const freelancerChatsQuery = `
       SELECT 
         u.name as user_name,
-        DATE(fc.created_at) as date,
+        DATE(fc.chat_date) as date,
         COUNT(*) as chat_count,
         SUM(CASE WHEN is_awarded = 1 THEN 1 ELSE 0 END) as offer_count
       FROM users u
       LEFT JOIN freelancer_chats fc ON fc.user_id = u.id 
-        AND fc.created_at BETWEEN ? AND ?
+        AND fc.chat_date BETWEEN ? AND ?
       WHERE u.role = 'user'
-      GROUP BY u.name, DATE(fc.created_at)
+      GROUP BY u.name, DATE(fc.chat_date)
     `;
 
     // Get all users' upwork bids stats
@@ -141,49 +142,88 @@ router.get('/weekly-bids', auth, async (req, res) => {
       upworkStats[user.name] = {};
     });
 
-    // Process freelancer stats by user
+
     freelancerBids[0].forEach(row => {
       if (!row.date) return; // Skip if no date (from LEFT JOIN)
       
-      const { user_name, date } = row;
+      const { user_name, date, bid_count, row_count } = row;
       const dateStr = new Date(date).toISOString().split('T')[0];
+      
+      console.log(`\nProcessing bids for ${user_name} on ${dateStr}:`);
+      console.log('Bid Count (sum of bid_number):', bid_count);
+      console.log('Row Count:', row_count);
       
       if (!freelancerStats[user_name][dateStr]) {
         freelancerStats[user_name][dateStr] = {
-          sent: row.sent_count || 0,
+          sent: parseInt(bid_count) || 0,
           chat: 0,
           offer: 0
         };
+      } else {
+        freelancerStats[user_name][dateStr].sent = bid_count || 0;
       }
+      
+      console.log('Current Stats after bids:', freelancerStats[user_name][dateStr]);
     });
+
+    console.log('\n=== Freelancer Chats Raw Data ===');
+    console.log(freelancerChats[0]);
 
     freelancerChats[0].forEach(row => {
       if (!row.date) return; // Skip if no date (from LEFT JOIN)
       
-      const { user_name, date } = row;
+      const { user_name, date, chat_count, offer_count } = row;
       const dateStr = new Date(date).toISOString().split('T')[0];
       
+      console.log(`\nProcessing chats for ${user_name} on ${dateStr}:`);
+      console.log('Chat Count:', chat_count);
+      console.log('Offer Count:', offer_count);
+      
       if (!freelancerStats[user_name][dateStr]) {
-        freelancerStats[user_name][dateStr] = { sent: 0, chat: 0, offer: 0 };
+        freelancerStats[user_name][dateStr] = { 
+          sent: parseInt(chat_count) || 0,
+          chat: parseInt(chat_count) || 0,
+          offer: parseInt(offer_count) || 0
+        };
+      } else {
+        freelancerStats[user_name][dateStr].chat = parseInt(chat_count) || 0;
+        freelancerStats[user_name][dateStr].offer = parseInt(offer_count) || 0;
+        // Add chat count to sent count since sent should include both bids and chats
+        freelancerStats[user_name][dateStr].sent += parseInt(chat_count) || 0;
       }
       
-      freelancerStats[user_name][dateStr].chat = row.chat_count || 0;
-      freelancerStats[user_name][dateStr].offer = row.offer_count || 0;
+      console.log('Current Stats after chats:', freelancerStats[user_name][dateStr]);
     });
 
+    console.log('\n=== Final Freelancer Stats ===');
+    console.log(JSON.stringify(freelancerStats, null, 2));
+
     // Process upwork stats by user
+    console.log('\n=== Upwork Bids Raw Data ===');
+    console.log(upworkBids[0]);
+
     upworkBids[0].forEach(row => {
       if (!row.date) return; // Skip if no date (from LEFT JOIN)
       
       const { user_name, date } = row;
       const dateStr = new Date(date).toISOString().split('T')[0];
       
+      console.log(`\nProcessing upwork bids for ${user_name} on ${dateStr}:`);
+      console.log('Sent Count:', row.sent_count);
+      console.log('Chat Count:', row.chat_count);
+      console.log('Offer Count:', row.offer_count);
+      
       upworkStats[user_name][dateStr] = {
-        sent: row.sent_count || 0,
-        chat: row.chat_count || 0,
-        offer: row.offer_count || 0
+        sent: parseInt(row.sent_count) || 0,
+        chat: parseInt(row.chat_count) || 0,
+        offer: parseInt(row.offer_count) || 0
       };
+      
+      console.log('Current Stats:', upworkStats[user_name][dateStr]);
     });
+
+    console.log('\n=== Final Upwork Stats ===');
+    console.log(JSON.stringify(upworkStats, null, 2));
 
     res.json({
       freelancer: freelancerStats,

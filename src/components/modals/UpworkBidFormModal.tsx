@@ -353,7 +353,6 @@ const UpworkBidFormModal = ({ isOpen, onClose, onSubmit, initialData }: UpworkBi
                         : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                     } placeholder-gray-400 dark:placeholder-gray-500`}
                     min="0"
-                    step="0.01"
                     required
                   />
                   {errors.spentBidAmount && (
