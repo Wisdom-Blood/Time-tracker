@@ -122,19 +122,11 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         selected={selectedDate}
         onChange={onChange}
         placeholderText={placeholder}
-        className={`px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-                  text-sm font-medium text-gray-900 dark:text-gray-100 
-                  bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 
-                  focus:outline-none focus:ring-2 focus:ring-blue-500 w-full`}
-        dateFormat="MM/dd/yyyy"
+        className={`mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-50 dark:focus:ring-opacity-50 hover:border-gray-400 dark:hover:border-gray-500`}
+        dateFormat="yyyy-MM-dd"
         portalId={portalId}
-        calendarClassName={`${calendarClassName} shadow-lg border border-gray-200 dark:border-gray-700`}
-        wrapperClassName={wrapperClassName}
-        popperPlacement="bottom"
-        onClickOutside={e => e.stopPropagation()}
-        popperProps={{
-          strategy: "absolute"
-        }}
+        popperClassName={isDark ? 'dark-theme' : ''}
+        calendarClassName={isDark ? 'dark-theme' : ''}
       />
       <style>{`
         #${portalId} {

@@ -44,13 +44,13 @@ export const pool = mysql.createPool({
 // Update freelancer_bids table
 const updateFreelancerBidsTable = `
   ALTER TABLE freelancer_bids 
-  ADD COLUMN IF NOT EXISTS status ENUM('sent', 'chat', 'offer') NOT NULL DEFAULT 'sent'
+  ADD COLUMN IF NOT EXISTS status ENUM('sent', 'chat', 'offer', 'client_view', 'no_view', 'reject') NOT NULL DEFAULT 'sent'
 `;
 
 // Update upwork_bids table
 const updateUpworkBidsTable = `
   ALTER TABLE upwork_bids 
-  MODIFY COLUMN status ENUM('sent', 'chat', 'offer') NOT NULL DEFAULT 'sent'
+  MODIFY COLUMN status ENUM('sent', 'chat', 'offer', 'client_view', 'no_view', 'reject') NOT NULL DEFAULT 'sent'
 `;
 
 // Initialize database

@@ -47,8 +47,6 @@ router.post('/upwork_bids', auth, async (req, res) => {
       accountName,
       status
     } = req.body;
-
-    console.log(status, "==========s");
     
     const userId = req.user.id;
     const now = new Date().toISOString();

@@ -33,15 +33,15 @@ router.post('/freelancer_bids', auth, async (req, res) => {
     const { skill, bidNumber, bidDate } = req.body;
     const userId = req.user.id; // Get user ID from auth token
     
-    const id = uuidv4();
     const now = new Date().toISOString();
     
-    await pool.query(
-      'INSERT INTO freelancer_bids (id, skill, bid_number, bid_date, created_at, updated_at, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [id, skill, bidNumber, bidDate || now.split('T')[0], now, now, userId]
+    const [result] = await pool.query(
+      'INSERT INTO freelancer_bids (skill, bid_number, bid_date, created_at, updated_at, user_id) VALUES (?, ?, ?, ?, ?, ?)',
+      [skill, bidNumber, bidDate || now.split('T')[0], now, now, userId]
     );
     
-    const [newBid] = await pool.query('SELECT * FROM freelancer_bids WHERE id = ?', [id]);
+    const [newBid] = await pool.query('SELECT * FROM freelancer_bids WHERE id = ?', [result.insertId]);
+    
     const formattedBid = {
       id: newBid[0].id,
       skill: newBid[0].skill,

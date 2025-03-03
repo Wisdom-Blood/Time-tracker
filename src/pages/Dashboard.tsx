@@ -93,6 +93,7 @@ const Dashboard = () => {
     const currentYear = new Date().getFullYear();
     return Array.from({ length: 5 }, (_, i) => currentYear - i);
   });
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -105,15 +106,25 @@ const Dashboard = () => {
 
   const fetchBidStats = async (date: Date) => {
     try {
-      const formattedDate = date.toISOString();
+      const weekStart = startOfWeek(date, { weekStartsOn: 1 });
+      const weekEnd = endOfWeek(date, { weekStartsOn: 1 });
       const response = await axios.get(
-        `http://localhost:5000/api/bids/stats/weekly?date=${formattedDate}`,
+        `http://localhost:5000/api/dashboard/weekly-bids?startDate=${weekStart.toISOString()}&endDate=${weekEnd.toISOString()}`,
         { withCredentials: true }
       );
       setBidStats(response.data);
     } catch (err) {
       console.error('Failed to fetch bid stats:', err);
       setError('Failed to load bid statistics');
+    }
+  };
+
+  const handleRefreshBidStats = async () => {
+    setIsRefreshing(true);
+    try {
+      await fetchBidStats(currentWeek);
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -517,18 +528,20 @@ const Dashboard = () => {
       </div>
       
       <div className="grid grid-cols-1 gap-8">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mt-6">
-            <WeeklyBidStats
-              stats={bidStats}
-              weekStart={weekStart}
-              weekEnd={weekEnd}
-              weekDays={weekDays}
-              handlePreviousWeek={() => handleWeekChange(addDays(currentWeek, -7))}
-              handleNextWeek={() => handleWeekChange(addDays(currentWeek, 7))}
-              getStatsForDate={getStatsForDate}
-            />
-          </div>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mt-6">
+          <WeeklyBidStats
+            stats={bidStats}
+            weekStart={weekStart}
+            weekEnd={weekEnd}
+            weekDays={weekDays}
+            handlePreviousWeek={() => handleWeekChange(addDays(currentWeek, -7))}
+            handleNextWeek={() => handleWeekChange(addDays(currentWeek, 7))}
+            getStatsForDate={getStatsForDate}
+            onRefresh={handleRefreshBidStats}
+            isLoading={isRefreshing}
+          />
         </div>
+      </div>
     </div>
   );
 };

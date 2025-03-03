@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { format, subWeeks, startOfWeek } from 'date-fns';
-import { ChevronLeft, ChevronRight, Calendar, ChevronDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, ChevronDown, RotateCw } from 'lucide-react';
 
 interface DayStats {
   sent: number;
@@ -27,6 +27,8 @@ interface WeeklyBidStatsProps {
   handlePreviousWeek: () => void;
   handleNextWeek: () => void;
   getStatsForDate: (date: Date, platform: 'freelancer' | 'upwork', userName: string) => DayStats;
+  onRefresh: () => void;
+  isLoading: boolean;
 }
 
 const formatValue = (value: number): string => {
@@ -55,6 +57,8 @@ export const WeeklyBidStats: React.FC<WeeklyBidStatsProps> = ({
   handlePreviousWeek,
   handleNextWeek,
   getStatsForDate,
+  onRefresh,
+  isLoading
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -78,45 +82,16 @@ export const WeeklyBidStats: React.FC<WeeklyBidStatsProps> = ({
             </span>
           </h2>
           <div className="flex items-center gap-2">
-            <div className="relative">
+            {platform === 'freelancer' && (
               <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-900"
+                onClick={onRefresh}
+                disabled={isLoading}
+                className={`inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-900 transition-colors ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <Calendar className="h-4 w-4 mr-2" />
-                Quick Select
-                <ChevronDown className="h-4 w-4 ml-2" />
+                <RotateCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                Refresh
               </button>
-              
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-700 z-10">
-                  <div className="py-1" role="menu" aria-orientation="vertical">
-                    <button
-                      onClick={() => handleQuickSelect(1)}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      role="menuitem"
-                    >
-                      Last Week
-                    </button>
-                    <button
-                      onClick={() => handleQuickSelect(2)}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      role="menuitem"
-                    >
-                      2 Weeks Ago
-                    </button>
-                    <button
-                      onClick={() => handleQuickSelect(4)}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      role="menuitem"
-                    >
-                      1 Month Ago
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-            
+            )}
             <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-1">
               <button
                 onClick={handlePreviousWeek}
