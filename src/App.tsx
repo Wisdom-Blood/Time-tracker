@@ -106,7 +106,6 @@ function App() {
                     </ProtectedRoute>
                   } 
                 />
-<<<<<<< HEAD
                 <Route 
                   path="/cash-history" 
                   element={
@@ -114,7 +113,7 @@ function App() {
                       <CashHistory />
                     </ProtectedRoute>
                   } 
-=======
+                />
                 <Route
                   path="/freelancer-bid-history"
                   element={
@@ -130,7 +129,6 @@ function App() {
                       <UpworkBidHistory />
                     </ProtectedRoute>
                   }
->>>>>>> ec447256e12ce79deb2f5be214aec512365a6d6f
                 />
                 <Route path="/" element={<Navigate to="/login" />} />
               </Routes>

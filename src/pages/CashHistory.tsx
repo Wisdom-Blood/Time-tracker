@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
+import CustomDatePicker from '../components/DatePicker';
 import {
   Plus,
-  Calendar,
   Trash2,
   Edit2,
   SlidersHorizontal,
-  DollarSign,
   Clock,
-  FileText
 } from 'lucide-react';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
@@ -41,13 +37,6 @@ interface FilterData {
   maxAmount: string;
 }
 
-// Custom styles for the DatePicker
-const datePickerStyles = `
-  w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-  text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700
-  focus:outline-none focus:ring-2 focus:ring-blue-500
-`;
-
 export default function CashHistory() {
   const { theme } = useTheme();
   const { user } = useAuth();
@@ -74,6 +63,16 @@ export default function CashHistory() {
     startDate?: string | null;
     endDate?: string | null;
   }>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+
+  // Calculate pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = cashHistories.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(cashHistories.length / itemsPerPage);
+
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   // Fetch cash histories with filters
   const fetchCashHistories = async () => {
@@ -283,27 +282,27 @@ export default function CashHistory() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Start Date
               </label>
-              <DatePicker
-                selected={filterData.startDate}
-                onChange={(date: Date | null) => setFilterData({ ...filterData, startDate: date })}
-                className={datePickerStyles}
-                dateFormat="yyyy-MM-dd"
-                placeholderText="Select start date"
-                wrapperClassName="w-full"
-              />
+              <div className="relative z-[50]">
+                <CustomDatePicker
+                  selectedDate={filterData.startDate}
+                  onChange={(date: Date | null) => setFilterData({ ...filterData, startDate: date })}
+                  placeholder="Start date"
+                  isDark={theme === 'dark'}
+                />
+              </div>
             </div>
             <div className="w-full">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 End Date
               </label>
-              <DatePicker
-                selected={filterData.endDate}
-                onChange={(date: Date | null) => setFilterData({ ...filterData, endDate: date })}
-                className={datePickerStyles}
-                dateFormat="yyyy-MM-dd"
-                placeholderText="Select end date"
-                wrapperClassName="w-full"
-              />
+              <div className="relative z-[50]">
+                <CustomDatePicker
+                  selectedDate={filterData.endDate}
+                  onChange={(date: Date | null) => setFilterData({ ...filterData, endDate: date })}
+                  placeholder="End date"
+                  isDark={theme === 'dark'}
+                />
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -361,7 +360,7 @@ export default function CashHistory() {
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {cashHistories.map((history) => (
+              {currentItems.map((history) => (
                 <tr key={history.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                     {new Date(history.date).toLocaleDateString()}
@@ -399,19 +398,72 @@ export default function CashHistory() {
           </table>
         </div>
         
+        {/* Pagination */}
+        <div className="px-6 py-4 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+          <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+            <span>
+              Showing <span className="font-medium">{indexOfFirstItem + 1}</span> to{' '}
+              <span className="font-medium">{Math.min(indexOfLastItem, cashHistories.length)}</span> of{' '}
+              <span className="font-medium">{cashHistories.length}</span> results
+            </span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 
+                ${currentPage === 1
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-600'
+                  : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                } border border-gray-300 dark:border-gray-600`}
+            >
+              Previous
+            </button>
+            <div className="flex items-center space-x-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+                <button
+                  key={number}
+                  onClick={() => paginate(number)}
+                  className={`px-3 py-1 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500
+                    ${number === currentPage
+                      ? 'bg-blue-600 text-white dark:bg-blue-600'
+                      : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                    } border border-gray-300 dark:border-gray-600`}
+                >
+                  {number}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => paginate(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500
+                ${currentPage === totalPages
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-600'
+                  : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                } border border-gray-300 dark:border-gray-600`}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+
         {/* Total Amount Footer */}
         <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
           <div className="flex justify-between items-center">
-            <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            <div className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
+              <Clock className="w-5 h-5 mr-2" />
               {dateRangeInfo.month && dateRangeInfo.year ? (
                 `${dateRangeInfo.month} ${dateRangeInfo.year}`
               ) : (
                 dateRangeInfo.startDate && dateRangeInfo.endDate ? (
-                  `${dateRangeInfo.startDate} - ${dateRangeInfo.endDate}`
+                  <span className="text-blue-600 dark:text-blue-400">
+                    {dateRangeInfo.startDate} - {dateRangeInfo.endDate}
+                  </span>
                 ) : ''
               )}
             </div>
-            <div>
+            <div className="flex items-center">
               <span className="text-sm font-medium text-gray-500 dark:text-gray-400 mr-2">
                 Total Amount:
               </span>
@@ -427,7 +479,7 @@ export default function CashHistory() {
       <Transition appear show={isOpen} as={Fragment}>
         <Dialog
           as="div"
-          className="relative z-10"
+          className="relative z-[70]"
           onClose={() => setIsOpen(false)}
         >
           <Transition.Child
@@ -453,7 +505,7 @@ export default function CashHistory() {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl transition-all">
+                <Dialog.Panel className="w-full max-w-md transform overflow-visible rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl transition-all">
                   <Dialog.Title
                     as="h3"
                     className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4"
@@ -485,16 +537,13 @@ export default function CashHistory() {
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Date
                       </label>
-                      <div className="relative mt-1">
-                        <DatePicker
-                          selected={formData.date}
+                      <div className="relative mt-1 z-[80]">
+                        <CustomDatePicker
+                          selectedDate={formData.date}
                           onChange={(date: Date | null) => date && setFormData({ ...formData, date })}
-                          className={datePickerStyles}
-                          dateFormat="yyyy-MM-dd"
-                          wrapperClassName="w-full"
-                          required
+                          placeholder="Select date"
+                          isDark={theme === 'dark'}
                         />
-                        <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none h-5 w-5" />
                       </div>
                     </div>
 

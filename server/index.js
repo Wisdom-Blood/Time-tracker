@@ -10,13 +10,10 @@ import reportRoutes from './routes/reports.js';
 import targetTimesRoutes from './routes/targetTimes.js';
 import dashboardRoutes from './routes/dashboard.js';
 import transactionRoutes from './routes/transactions.js';
-<<<<<<< HEAD
 import cashHistoryRoutes from './routes/cash-history.js';
-=======
 import freelancerRoutes from './routes/freelancer.js';
 import upworkRoutes from './routes/upwork.js';
 import bidRoutes from './routes/bids.js';
->>>>>>> ec447256e12ce79deb2f5be214aec512365a6d6f
 
 // Load environment variables
 dotenv.config();
@@ -144,8 +141,6 @@ const initDb = async () => {
 
     await pool.query(createTransactionsTable);
 
-<<<<<<< HEAD
-=======
     // Create bids table
     const createFreelancerBidsTable = `
       CREATE TABLE IF NOT EXISTS freelancer_bids (
@@ -203,7 +198,6 @@ const initDb = async () => {
     
     await pool.query(createUpworkBidsTable);
     
->>>>>>> ec447256e12ce79deb2f5be214aec512365a6d6f
     // Insert default target times if not exists
     const [existingTargets] = await pool.query('SELECT * FROM target_working_times');
     if (existingTargets.length === 0) {
@@ -242,13 +236,10 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/target-times', targetTimesRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/transactions', transactionRoutes);
-<<<<<<< HEAD
 app.use('/api/cash-history', cashHistoryRoutes);
-=======
 app.use('/api/freelancer', freelancerRoutes);
 app.use('/api/upwork', upworkRoutes);
 app.use('/api/bids', bidRoutes);
->>>>>>> ec447256e12ce79deb2f5be214aec512365a6d6f
 
 // Health check route
 app.get('/api/health', (req, res) => {

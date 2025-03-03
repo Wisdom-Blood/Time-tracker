@@ -2,11 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-<<<<<<< HEAD
-import { LogOut, User, LayoutDashboard, Users, Menu, X, Clock, CreditCard, Sun, Moon, ChevronDown } from 'lucide-react';
-=======
 import { LogOut, User, LayoutDashboard, Users, Menu, X, Clock, CreditCard, Sun, Moon, History, ChevronDown } from 'lucide-react';
->>>>>>> ec447256e12ce79deb2f5be214aec512365a6d6f
 
 const Navbar = () => {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
@@ -25,11 +21,11 @@ const Navbar = () => {
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
     ...(isAdmin ? [
-      { name: 'User Management', path: '/users', icon: <Users className="h-5 w-5" /> },
+      { name: 'Users', path: '/users', icon: <Users className="h-5 w-5" /> },
       { name: 'Target Times', path: '/target-times', icon: <Clock className="h-5 w-5" /> }
-    ] : []),
-    { name: 'Work Reports', path: '/reports', icon: <Clock className="h-5 w-5" /> },
-    { name: 'Profile', path: '/profile', icon: <User className="h-5 w-5" /> },
+    ] : [
+      { name: 'Work Reports', path: '/reports', icon: <Clock className="h-5 w-5" /> }
+    ])
   ];
 
   const paymentLinks = [
@@ -104,7 +100,7 @@ const Navbar = () => {
                 </div>
               </div>
             )}
-            {isAuthenticated && (
+            {isAuthenticated && !isAdmin && (
               <div className="hidden items-center sm:ml-6 sm:flex sm:space-x-8">
                 {user && (
                   <>
@@ -254,6 +250,27 @@ const Navbar = () => {
                 {link.name}
               </Link>
             ))}
+
+            {!isAdmin && (
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-2">
+                <Link
+                  to="/freelancer-bid-history"
+                  className="flex items-center px-3 py-2 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-800"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <History className="h-5 w-5 mr-2" />
+                  Freelancer History
+                </Link>
+                <Link
+                  to="/upwork-bid-history"
+                  className="flex items-center px-3 py-2 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-800"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <History className="h-5 w-5 mr-2" />
+                  Upwork History
+                </Link>
+              </div>
+            )}
 
             <button
               onClick={toggleTheme}

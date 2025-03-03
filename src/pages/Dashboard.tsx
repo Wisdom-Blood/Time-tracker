@@ -205,6 +205,12 @@ const Dashboard = () => {
       subtitle: 'Active users'
     },
     {
+      icon: Wallet,
+      title: 'Total Earnings',
+      value: `$${dashboardStats.allTimeEarnings.toLocaleString()}`,
+      subtitle: 'All time earnings'
+    },
+    {
       icon: DollarSign,
       title: 'Monthly Target',
       value: `$${dashboardStats.monthlyPlan.toLocaleString()}`,
@@ -221,12 +227,6 @@ const Dashboard = () => {
       title: 'Top Performer',
       value: dashboardStats.topUser.name,
       subtitle: `$${dashboardStats.topUser.amount.toLocaleString()}`
-    },
-    {
-      icon: Wallet,
-      title: 'Total Earnings',
-      value: `$${dashboardStats.allTimeEarnings.toLocaleString()}`,
-      subtitle: 'All time earnings'
     }
   ];
 
@@ -241,7 +241,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-7 mb-8">
         {stats.map((stat, index) => (
           <div 
             key={index}
